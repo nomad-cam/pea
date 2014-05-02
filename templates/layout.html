@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html lang='en'>
+<head>
+
+    {% block head %}
+    <title>Pea</title>  
+    {% endblock %}
+    <link rel="stylesheet" type="text/css" href="styles/style.css">    
+
+</head>
+
+<body>
+    <div class='header'>
+        <h1>Peedy Pee - {% block greeting %}{% endblock %}</h1>
+    </div>
+    <div class='sidebar'>
+        {% block sidebar %}
+        <a href="/"> Home </a><br>
+        <a href="/">Edit Your PDP</a><br>
+        <p>
+        <a href='/logout'>Logout</a><br>
+        {% endblock %}
+    </div>
+    <div class='content'>
+        {% block content %}
+
+        {% endblock %}
+    </div>
+    <div class='footer'>
+        {% block footer %}
+        &copy SpecOps 2014 pdp.synchrotron.org.au
+        {% endblock %}
+    </div>
+</body>
+</html>

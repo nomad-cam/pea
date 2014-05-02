@@ -1,0 +1,132 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: blue;
+}
+
+.clearfix:after {
+  content: ".";    
+  display: block;    
+  height: 0;
+  clear:both;
+  overflow: hidden; 
+}
+
+.clearfix {
+  display: inline-block;
+}
+
+.error {
+  color: red;
+}
+
+h1 {
+}
+
+td {
+  border: 1px solid black;
+}
+
+input[type='radio'], label {
+  horizontal-align:left;
+  vertical-align:baseline;
+}
+
+.header {
+  background-color: lightSkyBlue;
+  height: 80px;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.footer {
+  background-colour: #9900FF;
+  height: 40px;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  clear: both;
+}
+
+.wrapper {
+  position: relative;
+}
+
+.sidebar {
+  float:left;
+  left: 0;
+  top:0;
+  width: 200px;
+  height: 600px;
+  background-color: LightCyan;
+}
+
+.content {
+  top: 0;
+  margin-left:210px;
+}
+
+.login {
+  text-align: center;
+}
+
+.compliancetable {
+  border: 1px solid black;
+  border-collapse: collapse;
+  width: 60%;
+}
+
+.grouptable {
+  border: 1px solid black;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.personaltable {
+  border: 1px solid black;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.th_odd {
+  background-color: LimeGreen;
+}
+
+.th_even {
+  background-color: LightGreen;
+}
+
+.th_top {
+  background-color: Green;
+  border: 1px solid LightGreen;
+}
+
+.right {
+  float:right;
+}
+
+#person_div {
+  
+}
+
+#group_div {
+}
+
+#people_list {
+  width:200px;
+  float:left;
+}
+
+#person_attributes {
+  width:300px;
+  float:left;
+}
+
+#person_attributes>label {
+  float:right;
+}
+

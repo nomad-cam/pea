@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block greeting %}
+{{ user}}
+{% endblock %}
+
+{% block content %}
+<h1> PDP - Home</h1>
+<hr>
+<h2> Personal PDP </h2>
+<ul>
+    <li><a href="personal.pdp/">Edit Personal PDP: {{ user }} </a></li>
+    <br>
+    
+{% endblock %}

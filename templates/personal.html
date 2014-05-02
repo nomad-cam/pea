@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block greeting %}
+{{ user }}
+{% endblock %}
+
+{% block sidebar %}
+
+{% endblock %}
+
+{% block content %}
+<h1>Personal PDP for {{ user }}</h1>
+<hr>
+<h2>Group Goals for {{ group }}</h2>
+<table class="grouptable">
+    <tr>
+        <th class="th_odd"> Responsibility </th>
+        <th class="th_even"> Area </th>
+        <th class="th_odd"> Description </th>
+        <th class="th_even"> Timing </th>
+        <th class="th_odd"> Budget </th>
+        <th class="th_even"> Training? </th>
+    </tr>
+    <tr>
+    
+    </tr>
+</table>
+<br>
+<br>
+<form action='/personal_pdp/{{user}}' method="POST">
+<table class="personaltable">
+    <tr>
+        <th class="th_odd">Personal Goal</th>
+        <th class="th_even">Aligned with Group Goals</th>
+        <th class="th_odd">Supporting Docs, Reasons, Justifications</th>
+        <th class="th_even">Timing</th>
+        <th class="th_odd">Budget</th>
+        <th class="th_even">Training?</th>
+    </tr>
+    <tr>
+    
+    </tr>
+</table>
+<br>
+<br>
+<input type="submit" value="Add Row">
+<input type="submit" value="Save Data">
+
+<h2>Compliance and Values</h2>
+<table class='compliancetable'>
+    <tr>
+        <th class='th_top' colspan="3">Compliance</th>
+        <th class='th_top' colspan='3'>Values</th>
+    </tr>
+    <tr>
+        <th class='th_odd'>Area</th>
+        <th class='th_even'>Grade</th>
+        <th class='th_odd'>Comment</th>
+        <th class='th_even'>Value</th>
+        <th class='th_odd'>Grade</th>
+        <th class='th_even'>Comment</th>
+    </tr>
+</table>
+<br>
+<input type='submit' value='Save Data'>
+<br>
+<br>
+<h2> Sign-off</h2>
+<label>Manager Sign-off<input type=checkbox name="manager-sign"></label>
+<br>
+<label>Employee Sign-off<input type=checkbox name="employee-sign"></label>
+<br>
+<label>Emplyee Comments<textarea rows='4' cols='20'></textarea></label>
+{% endblock %}
