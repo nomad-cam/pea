@@ -8,13 +8,17 @@ import os
 import cherrypy
 import jinja2
 import MySQLdb
+import MySQLdb.cursors
 import ldap
+import json
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates/')
 STYLES_DIR = os.path.join(BASE_DIR,'styles/')
 
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(TEMPLATE_DIR), autoescape=True)
+
+db = MySQLdb.connect(host='localhost',user='root',passwd='password',db='peedy-pee',cursorclass=MySQLdb.cursors.DictCursor)
 
 class PeedyPee(object):
     
@@ -124,6 +128,56 @@ class PeedyPee(object):
             cookies = self.returnCookies()
             t = jinja_env.get_template('admin.html')
             return t.render(name=cookies['fname'])
+        else:
+            raise cherrypy.HTTPRedirect('/login')
+
+    @cherrypy.expose
+    def groups(self):
+        if self.loggedin():
+            cur = db.cursor()
+            cur.execute("SELECT * FROM `group`")
+            
+            return json.dumps(cur.fetchall())
+    
+    @cherrypy.expose
+    def people(self):
+        if self.loggedin():
+            cur = db.cursor()
+            cur.execute("SELECT * FROM `person`")
+            
+            return json.dumps(cur.fetchall())
+            
+    @cherrypy.expose
+    def admin_update_person(self, **kws):
+        if self.loggedin():
+            #db_update = MySQLdb.connect(host='localhost',user='root',passwd='password',db='peedy-pee')
+        
+            p_manager = kws['person_manager']
+            p_lname = kws['person_lastname']
+            p_fname = kws['person_firstname']
+            p_uname = kws['person_username']
+            p_group = kws['person_group']
+            try:
+                p_ismanager = kws['person_ismanager']
+            except:
+                p_ismanager = 0
+            
+            cur_person = db.cursor()
+            try:
+                #cur_person.execute("INSERT INTO `peedy-pee`.`person` (user,firstName,lastName,group,manager) VALUES ('%s','%s','%s','%s','%s')" % (p_uname,p_fname,p_lname,p_group,p_manager))
+                query = "INSERT INTO person (groupName,userName,firstName,lastName,manager) VALUES ('%s','%s','%s','%s','%s')" % (p_group,p_uname,p_fname,p_lname,p_manager)
+                cur_person.execute(query)
+                db.commit()
+            except MySQLdb.Error, e:
+                db.rollback()
+                return "Error! %d: %s"%(e.args[0],e.args[1])
+                
+            return kws
+
+#class Admin(object):
+#    @cherrypy.expose
+#    def index(self):
+#        return "Hello Admin!"
 
 cherrypy.config.update({
     'server.socket_host': 'localhost',
@@ -147,6 +201,7 @@ config = {
 }
 
 cherrypy.tree.mount(PeedyPee(),'/', config=config)
+#cherrypy.tree.mount(Admin(),'/admin', config=config)
 cherrypy.engine.autoreload.on = True
 cherrypy.engine.autoreload.frequency = 5
 cherrypy.engine.autoreload.files.add('app_pdp.py') #remove for production

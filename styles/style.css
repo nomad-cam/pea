@@ -107,6 +107,7 @@ input[type='radio'], label {
 
 .right {
   float:right;
+  clear:both;
 }
 
 #person_div {
@@ -121,12 +122,26 @@ input[type='radio'], label {
   float:left;
 }
 
+#group_list {
+  width: 200px;
+  float: left;
+}
+
 #person_attributes {
   width:300px;
   float:left;
 }
 
+#group_attributes {
+  width: 300px;
+  float: left;
+}
+
 #person_attributes>label {
   float:right;
+}
+
+#group_attributes>label {
+  float: right;
 }
 
