@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block greeting %}
-{{ user }}
+{{ name }}
 {% endblock %}
 
 
@@ -26,6 +26,7 @@
 </table>
 <br>
 <br>
+<h2>Personal PDP Goals</h2>
 <form action='/personalpdp/{{user}}' method="POST">
 <table class="personaltable">
     <tr>

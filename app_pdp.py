@@ -28,16 +28,26 @@ class PeedyPee(object):
         except:
             return False
 
+    def returnCookies(self):
+        cookie = cherrypy.request.cookie
+        try:
+            user = cookie['peedy-pee'].value
+            fname = cookie['name'].value
+            position = cookie['position'].value
+            return {'user': user, 'fname': fname,'title': position}
+        except:
+            return False
+
     @cherrypy.expose
     def index(self):
-        u = self.loggedin()
-        if u:
+        if self.loggedin():
+            cookies = self.returnCookies()
             t = jinja_env.get_template('index.html')
-            return t.render(user=u)
+            return t.render(user=cookies['fname'])
         else:
-            #raise cherrypy.HTTPRedirect("/login")
-            t = jinja_env.get_template('login.html')
-            return t.render()
+            raise cherrypy.HTTPRedirect("/login")
+            #t = jinja_env.get_template('login.html')
+            #return t.render()
     
     @cherrypy.expose
     def logout(self):
@@ -103,12 +113,17 @@ class PeedyPee(object):
 
     @cherrypy.expose
     def personalpdp(self):
-        u = self.loggedin()
-        if u:
+        if self.loggedin():
+            cookies = self.returnCookies()
             t = jinja_env.get_template('personal.html')
-            return t.render(user=u)
+            return t.render(user=cookies['user'],position=cookies['title'],name=cookies['fname'])
         
-        
+    @cherrypy.expose
+    def admin(self):
+        if self.loggedin():
+            cookies = self.returnCookies()
+            t = jinja_env.get_template('admin.html')
+            return t.render(name=cookies['fname'])
 
 cherrypy.config.update({
     'server.socket_host': 'localhost',
