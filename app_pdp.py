@@ -56,38 +56,53 @@ class PeedyPee(object):
     def dologin(self, **kws):
 
 
-        if "username" in kws:
+        if (("username" in kws) and ("password" in kws)):
             user = kws['username']
-        if "password" in kws:
+        #if "password" in kws:
             passw = kws['password']
             
         ldap_server = "10.7.0.243"    # ldap://
         acct_sx = "@synchrotron.org.au"
-        
+        base_dn = 'dc=synchrotron,dc=org,dc=au'
+                
         connect = ldap.open(ldap_server)
         
         try:
             connect.simple_bind_s(user+acct_sx,passw)
             
+            result = connect.search_s(base_dn,ldap.SCOPE_SUBTREE, 
+                        '(&(objectclass=User) (sAMAccountName='+user+'))', 
+                        ['title','displayName','givenName'])
+            
+            position = result[0][1]['title'][0]
+            name = result[0][1]['givenName'][0]
+            
             cookie =  cherrypy.response.cookie
             cookie['peedy-pee'] = user
             cookie['peedy-pee']['path'] = '/'
             cookie['peedy-pee']['max-age'] = 7200
-            cookie['peedy-pee']['version'] = 1
+            
+            cookie['position'] = position
+            cookie['position']['path'] = '/'
+            cookie['position']['max-age'] = 7200
+            
+            cookie['name'] = name
+            cookie['name']['path'] = '/'
+            cookie['name']['max-age'] = 7200
             
             #t = jinja_env.get_template('index.html')
             raise cherrypy.HTTPRedirect('/')
             #return t.render(user=user)
 
         except ldap.LDAPError:
-            connect.unbdin_s()
+            connect.unbind_s()
             #t = jinja_env.get_template('login.html')
             error = 'Incorrect Login Details. Please try again...'
             #return t.render(err_msg = error)
             raise cherrypy.HTTPRedirect('/login')
 
     @cherrypy.expose
-    def personal_pdp(self):
+    def personalpdp(self):
         u = self.loggedin()
         if u:
             t = jinja_env.get_template('personal.html')
@@ -118,5 +133,7 @@ config = {
 
 cherrypy.tree.mount(PeedyPee(),'/', config=config)
 cherrypy.engine.autoreload.on = True
+cherrypy.engine.autoreload.frequency = 5
 cherrypy.engine.autoreload.files.add('app_pdp.py') #remove for production
 cherrypy.engine.start()
+

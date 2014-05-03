@@ -4,12 +4,11 @@
 {{ user }}
 {% endblock %}
 
-{% block sidebar %}
-
-{% endblock %}
 
 {% block content %}
-<h1>Personal PDP for {{ user }}</h1>
+
+<h1>Personal PDP for {{ name }}</h1>
+<h2>{{ position }}</h2>
 <hr>
 <h2>Group Goals for {{ group }}</h2>
 <table class="grouptable">
@@ -27,7 +26,7 @@
 </table>
 <br>
 <br>
-<form action='/personal_pdp/{{user}}' method="POST">
+<form action='/personalpdp/{{user}}' method="POST">
 <table class="personaltable">
     <tr>
         <th class="th_odd">Personal Goal</th>
@@ -45,8 +44,10 @@
 <br>
 <input type="submit" value="Add Row">
 <input type="submit" value="Save Data">
+</form>
 
 <h2>Compliance and Values</h2>
+<form action='/personalpdp/{{ user }}' method='POST'>
 <table class='compliancetable'>
     <tr>
         <th class='th_top' colspan="3">Compliance</th>
@@ -63,12 +64,13 @@
 </table>
 <br>
 <input type='submit' value='Save Data'>
+</form>
 <br>
 <br>
 <h2> Sign-off</h2>
 <label>Manager Sign-off<input type=checkbox name="manager-sign"></label>
-<br>
+<br />
 <label>Employee Sign-off<input type=checkbox name="employee-sign"></label>
-<br>
+<br />
 <label>Emplyee Comments<textarea rows='4' cols='20'></textarea></label>
 {% endblock %}
