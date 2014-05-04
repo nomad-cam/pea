@@ -44,27 +44,38 @@
 <br>
 <br>
 <input type="submit" value="Add Row">
-<input type="submit" value="Save Data">
+<input type="submit" value="Save PDP Data">
 </form>
 
-<h2>Compliance and Values</h2>
+<h2>Values</h2>
 <form action='/personalpdp/{{ user }}' method='POST'>
-<table class='compliancetable'>
-    <tr>
-        <th class='th_top' colspan="3">Compliance</th>
+<table class='valuestable'>
+    <tr>       
         <th class='th_top' colspan='3'>Values</th>
     </tr>
     <tr>
-        <th class='th_odd'>Area</th>
-        <th class='th_even'>Grade</th>
-        <th class='th_odd'>Comment</th>
         <th class='th_even'>Value</th>
         <th class='th_odd'>Grade</th>
         <th class='th_even'>Comment</th>
     </tr>
 </table>
 <br>
-<input type='submit' value='Save Data'>
+<input type='submit' value='Save Values Data'>
+</form>
+<h2>Compliance</h2>
+<form action='' method='POST'>
+<table class='compliancetable'>
+    <tr>
+        <th class='th_top' colspan='3'>Compliance</th>
+    </tr>
+    <tr>
+        <th class='th_odd'>Area</th>
+        <th class='th_even'>Grade</th>
+        <th class='th_odd'>Comment</th>
+    </tr>
+</table>
+<br>
+<input type='submit' value='Save Compliance Data'>
 </form>
 <br>
 <br>

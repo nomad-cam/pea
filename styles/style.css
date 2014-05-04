@@ -80,6 +80,12 @@ input[type='radio'], label {
   width: 60%;
 }
 
+.valuestable {
+  border: 1px solid black;
+  border-collapse: collapse;
+  width:80%;
+}
+
 .grouptable {
   border: 1px solid black;
   border-collapse: collapse;
