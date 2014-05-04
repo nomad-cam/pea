@@ -11,6 +11,7 @@ import MySQLdb
 import MySQLdb.cursors
 import ldap
 import json
+import string
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates/')
@@ -131,18 +132,20 @@ class PeedyPee(object):
         if self.loggedin():
             cookies = self.returnCookies()
             
+            #check for the error flag and send to template            
             if 'e' in kws:
                 err = kws['e']
             else:
                 err = ""
 
+            #Always display the group list and the user list
             query = "SELECT userName,uid FROM `person`"
             result_people = self.runQuery(query,all=1)
 
             query = "SELECT groupName,gid FROM `group`"
             result_group = self.runQuery(query,all=1)
             
-            #result_g_select = {'groupName':"",'groupChecked':'0'}
+            #Group edit has been initiated
             if 'group_click' in kws:
                 try:
                     group_select = kws['group_list']
@@ -157,12 +160,31 @@ class PeedyPee(object):
                 except:            
                     return t.render(error=err,name=cookies['fname'],people_dict=result_people,
                             group_dict=result_group,groupName="",groupEnabled=0)
-                
-                
-                
             
-            return t.render(error=err,name=cookies['fname'],people_dict=result_people,group_dict=result_group)
+            #Person edit or pdp view has been initiated
+            elif 'person_click' in kws:
+                
+                person_select = kws['person_list']
+                #check for person edit
+                if 'person_edit' in kws:
+                    try:
+                        pass
+                    except:
+                        pass
+                
+                #Check for person pdp view
+                if 'person_pdp' in kws:
+                    try:
+                        pass
+                    except:
+                        pass
+                        
+                
+            #Just display the basic page if no other data is requested    
+            else:
+                return t.render(error=err,name=cookies['fname'],people_dict=result_people,group_dict=result_group)
         else:
+            #If not logged in the redirect to login page
             raise cherrypy.HTTPRedirect('/login')
 
     @cherrypy.expose
@@ -189,7 +211,7 @@ class PeedyPee(object):
     #Check if the user 'uname' is already in the database
     def isUserDB(self,uname):
         cur_check = db.cursor()
-        query = "SELECT userName FROM person WHERE userName = %s" % uname
+        query = "SELECT userName FROM `person` WHERE userName = '%s'" % uname
         cherrypy.log(query)
         try:
             cur_check.execute(query)
@@ -203,21 +225,73 @@ class PeedyPee(object):
             return False
     
     @cherrypy.expose
+    #Chewck if gname is in the database already        
+    def isGroupDB(self,gname):
+        cur_check = db.cursor()
+        query = "SELECT groupName FROM `group` WHERE groupName = '%s'" % gname
+        try:
+            cur_check.execute(query)
+            if cur_check.rowcount:
+                return cur_check.fetchone()
+            else:
+                return False
+        except:
+            return False
+        
+    
+    @cherrypy.expose
     #general db query helper
-    def runQuery(self,query,all=1):
+    def runQuery(self,query,all=1,read=1):
         cur_run = db.cursor()
         try:
             cur_run.execute(query)
             db.commit()
             #return cur_run.fetchall()
-            if all:
-                return cur_run.fetchall()
+            if read:
+                if all:
+                    return cur_run.fetchall()
+                else:
+                    return cur_run.fetchone()
             else:
-                return cur_run.fetchone()
+                return True
         except:
             db.rollback()
-            return {'userName': 'roddac'}
+            return {}
+    
+    @cherrypy.expose
+    #Update the DB with group information
+    def admin_update_group(self, **kws):
+        if self.loggedin():
+            g_name = kws['group_name']
             
+            if 'group_enabled' in kws:
+                g_enable = kws['group_enabled']
+            else:
+                g_enable = 'off'
+            
+            g_url = g_name.lower().replace(" ","_")
+            
+            if g_enable == 'on':
+                g_enable = 1
+            else:
+                g_enable = 0
+            
+            if g_name == "":
+                raise cherrypy.HTTPRedirect('/admin?e=noGroup')
+            
+            if self.isGroupDB(g_name):
+                query = ("UPDATE `group` SET groupName='%s',enabled='%s',urlName='%s'WHERE groupName='%s'" 
+                        % (g_name,g_enable,g_url,g_name))
+            else:
+                query = "INSERT INTO `group` (groupName,enabled,urlName) VALUES ('%s','%s','%s')" % (g_name,g_enable,g_url)
+                
+            self.runQuery(query,read=0)
+                        
+            raise cherrypy.HTTPRedirect('/admin?e=Group Data Updated')
+            
+        else:
+            raise cherrypy.HTTPRedirect('/login')
+    
     @cherrypy.expose
     #Update the DB with the user information
     def admin_update_person(self, **kws):
