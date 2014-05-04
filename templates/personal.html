@@ -21,6 +21,8 @@
         <th class="th_even"> Training? </th>
     </tr>
     <tr>
+        
+        
     
     </tr>
 </table>
@@ -32,13 +34,21 @@
     <tr>
         <th class="th_odd">Personal Goal</th>
         <th class="th_even">Aligned with Group Goals</th>
-        <th class="th_odd">Supporting Docs, Reasons, Justifications</th>
-        <th class="th_even">Timing</th>
+        <th class="th_odd">Reasons and Justifications</th>
+        <th class="th_even">Deadline</th>
         <th class="th_odd">Budget</th>
         <th class="th_even">Training?</th>
     </tr>
     <tr>
-    
+        <td><textarea name='goals' rows='4' cols='40'>pdp goal</textarea></td>
+        <td><label><input type='radio' name='aligns' value='true' checked='...'>Yes</label><br>
+            <label><input type='radio' name='aligns' value='false' checked='...'>No</label></td>
+        <td><textarea name='reason' rows='4' cols='20'>pdp reason</textarea></td>
+        <td><input type='text' name='deadline' size='10' value=''></td>
+        <td><input type='number' name='budget' size='10' value=''></td>
+        <td><label><input type='radio' name='training' value='true' checked='...'>Yes</label>
+            <label><input type='radio' name='training' value='false' checked='...'>No</label>
+            <input type='text' name='course_other'></td>
     </tr>
 </table>
 <br>
