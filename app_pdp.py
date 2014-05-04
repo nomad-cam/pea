@@ -48,8 +48,16 @@ class PeedyPee(object):
     def index(self):
         if self.loggedin():
             cookies = self.returnCookies()
+            userName = cookies['user']
+            query = "SELECT * FROM `person` WHERE userName='%s'" % userName
+            side_dict = self.runQuery(query)[0]
+            
+            #uManager = result[0]['manager']
+            #return side_dict
+            
             t = jinja_env.get_template('index.html')
-            return t.render(user=cookies['fname'])
+            return t.render(userName=userName,title=cookies['title'],
+                            firstName=cookies['fname'],sideDB=side_dict)
         else:
             raise cherrypy.HTTPRedirect("/login")
             #t = jinja_env.get_template('login.html')
@@ -121,8 +129,13 @@ class PeedyPee(object):
     def personalpdp(self):
         if self.loggedin():
             cookies = self.returnCookies()
+            
+            userName = cookies['user']
+            query = "SELECT * FROM `person` WHERE userName='%s'" % userName
+            side_dict = self.runQuery(query)[0]
+            
             t = jinja_env.get_template('personal.html')
-            return t.render(user=cookies['user'],position=cookies['title'],name=cookies['fname'])
+            return t.render(sideDB=side_dict,user=cookies['user'],position=cookies['title'],name=cookies['fname'])
         
     @cherrypy.expose
     def admin(self, **kws):
@@ -131,6 +144,11 @@ class PeedyPee(object):
         
         if self.loggedin():
             cookies = self.returnCookies()
+            
+            userName = cookies['user']
+            title = cookies['title']
+            query = "SELECT * FROM `person` WHERE userName='%s'" % userName
+            side_dict = self.runQuery(query)[0]
             
             #check for the error flag and send to template            
             if 'e' in kws:
@@ -154,11 +172,11 @@ class PeedyPee(object):
                     grp = result_g_select['groupName']
                     ebl = result_g_select['enabled']
                 
-                    return t.render(error=err,name=cookies['fname'],people_dict=result_people,
+                    return t.render(sideDB=side_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
                             group_dict=result_group,groupName=grp,groupEnabled=ebl)
                     
                 except:            
-                    return t.render(error=err,name=cookies['fname'],people_dict=result_people,
+                    return t.render(sideDB=side_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
                             group_dict=result_group,groupName="",groupEnabled=0)
             
             #Person edit or pdp view has been initiated
@@ -182,7 +200,8 @@ class PeedyPee(object):
                 
             #Just display the basic page if no other data is requested    
             else:
-                return t.render(error=err,name=cookies['fname'],people_dict=result_people,group_dict=result_group)
+                return t.render(sideDB=side_dict,error=err,title=title,name=cookies['fname'],
+                                people_dict=result_people,group_dict=result_group)
         else:
             #If not logged in the redirect to login page
             raise cherrypy.HTTPRedirect('/login')

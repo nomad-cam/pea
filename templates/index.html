@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block greeting %}
-{{ user}}
+{{ sideDB.firstName }}
 {% endblock %}
 
 {% block content %}
@@ -9,7 +9,7 @@
 <hr>
 <h2> Personal PDP </h2>
 <ul>
-    <li><a href="personalpdp/">Edit Personal PDP: {{ user }} </a></li>
+    <li><a href="personalpdp/{{ sideDB.userName }}">Edit Personal PDP: {{ sideDB.userName }} </a></li>
     <br>
     
 {% endblock %}

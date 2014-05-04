@@ -15,9 +15,34 @@
     </div>
     <div class='sidebar'>
         {% block sidebar %}
+        
+        <p><b>Name: </b> {{ sideDB.firstName }} </p>
+        <p><b>Title: </b> {{title}} </p>
+        <p><b>Group: </b> {{sideDB.groupName}} </p>
+        <p><b>Manager: </b> {{sideDB.manager}} </p>
+        <hr>
+
+        
         <a href="/"> Home </a><br>
-        <a href="/">Edit Your PDP</a><br>
-        <p>
+        <br>
+        
+        <a href="/personalpdp/{{ sideDB.userName }}">Edit Your PDP</a><br>
+        <br>
+        <br>
+        {% if sideDB.isManager %}
+        {% if sideDB.managedGroups %}
+        {% for group in sideDB.managedGroups %}
+        Edit Group: <a href='/grouppdp/{{ group.groupUrl }}'> {{ group.groupName }} </a>
+        {% endfor %}
+        {% endif %}
+        {% endif %}
+        <br>
+        <br>
+        {% if sideDB.isAdmin %}
+        <a href="/admin">Admin</a>
+        {% endif %}
+        <br>
+        <br>
         <a href='/logout'>Logout</a><br>
         {% endblock %}
     </div>
