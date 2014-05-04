@@ -7,18 +7,20 @@
 {% block content %}
 <script type='text/javascript'>
 $(document).ready(function() {
+    alert('pre-loading');
     getpeople();
     getgroups();
+    alert('Starting JS');
     
     $('#people_list').change(function() {
         $('#person_attributes>input').val('');
         $.ajax({
             url: '/people/'+ $(this).val(),
             success: function(data) {
-                $('#person_username').val(data.username);
+                $('#person_username').val(data.userName);
                 $('#person_firstname').val(data.firstName);
                 $('#person_lastname').val(data.lastName);
-                $('#person_group').val(data.group);
+                $('#person_group').val(data.groupName);
                 $('#person_manager').val(data.manager);
                 $('#person_ismanager').val(data.isManager);
             }
@@ -30,11 +32,12 @@ $(document).ready(function() {
             url: '/people',
             success: function(data){
                 data.foreach(function(person) {
-                    $('#people_list').append('<option value="' + person._id + '" data-username='+peron.username + '>'+person.firstname+'</option>');
+                    $('#people_list').append('<option value="'+person.uid+'" data-username='+person.userName+'>'+person.firstName+'</option>');
                 });
             },
             datatype: 'json'
         });
+        alert('What People?');
     }
     
     function getgroups(){
@@ -59,7 +62,11 @@ $(document).ready(function() {
 <h2>Edit People</h2>
 <hr>
 <div id='person_div' class='clearfix'>
-<select id=people_list size='10'></select>
+<select id=people_list size='10'>
+{% for value in people_dict %}
+<option value='{{ key }} '>{{ value.userName }}</option>
+{% endfor %}
+</select>
 <form id="person_attributes" action='/admin_update_person' method="POST">
 <label>Username: <input id="person_username" type="text" name="person_username"></label><br>
 <label>First Name: <input id="person_firstname" type="text" name="person_firstname"></label><br>

@@ -15,6 +15,7 @@ import json
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates/')
 STYLES_DIR = os.path.join(BASE_DIR,'styles/')
+JS_DIR = os.path.join(BASE_DIR,'js/')
 
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(TEMPLATE_DIR), autoescape=True)
 
@@ -126,27 +127,45 @@ class PeedyPee(object):
     def admin(self):
         if self.loggedin():
             cookies = self.returnCookies()
+            
+            query = "SELECT userName FROM `person`"
+            #cur = db.cursor()
+            #cur.execute(query)
+            #result_people = cur.fetchall()
+            
+            result_people = self.runQuery(query,all=1)
+            #if (len(result_people) == 0):
+            #    result_people = False
+           
+            #return result_people
+            
             t = jinja_env.get_template('admin.html')
-            return t.render(name=cookies['fname'])
+            return t.render(name=cookies['fname'],people_dict=result_people)
         else:
             raise cherrypy.HTTPRedirect('/login')
 
     @cherrypy.expose
     def groups(self):
         if self.loggedin():
-            cur = db.cursor()
-            cur.execute("SELECT * FROM `group`")
-            
-            return json.dumps(cur.fetchall())
+            #cur = db.cursor()
+            #cur.execute("SELECT * FROM `group`")
+            result={}
+            g_query = "SELECT * FROM `group`"
+            result = self.runQuery(g_query)
+            return json.dumps(result)
     
     @cherrypy.expose
     def people(self):
         if self.loggedin():
-            cur = db.cursor()
-            cur.execute("SELECT * FROM `person`")
-            
-            return json.dumps(cur.fetchall())
-
+            #cur = db.cursor()
+            #cur.execute("SELECT * FROM `person`")
+            result={}
+            p_query = "SELECT * FROM `person`"
+            result = self.runQuery(p_query)   
+            return json.dumps(result)
+    
+    #@cherrypy.expose
+    #Check if the user 'uname' is already in the database
     def isUserDB(self,uname):
         cur_check = db.cursor()
         query = "SELECT userName FROM person WHERE userName = %s" % uname
@@ -159,13 +178,32 @@ class PeedyPee(object):
             else:
                 return False
         except:
+            #return "Error! %d: %s" % (e.args[0],e.args[1])
             return False
+    
+    @cherrypy.expose
+    #general db query helper
+    def runQuery(self,query,all=1):
+        cur_run = db.cursor()
+        try:
+            cur_run.execute(query)
+            db.commit()
+            #return cur_run.fetchall()
+            if all:
+                return cur_run.fetchall()
+            else:
+                return cur_run.fetchone()
+        except:
+            db.rollback()
+            return {'userName': 'roddac'}
             
     @cherrypy.expose
+    #Update the DB with the user information
     def admin_update_person(self, **kws):
         if self.loggedin():
             #db_update = MySQLdb.connect(host='localhost',user='root',passwd='password',db='peedy-pee')
         
+            #Collect the information entered from the form
             p_manager = kws['person_manager']
             p_lname = kws['person_lastname']
             p_fname = kws['person_firstname']
@@ -178,11 +216,12 @@ class PeedyPee(object):
             
             cur_person = db.cursor()
 
+            #If user already in Database the update, else add a new user
             if self.isUserDB(p_uname):
                 try:
                     query = ("UPDATE person SET "
-                    "groupName='%s',userName='%s',firstName='%s',lastName='%s',manager='%s',isManager='%s' WHERE "
-                    "userName='%s'" % (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager))
+                             "groupName='%s',userName='%s',firstName='%s',lastName='%s',manager='%s',isManager='%s' "
+                             "WHERE userName='%s'" % (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager,p_uname))
                     cur_person.execute(query)
                     db.commit()
                 except MySQLdb.Error,e:
@@ -223,8 +262,11 @@ config = {
     '/styles':
         {'tools.staticdir.on': True,
          'tools.staticdir.dir': STYLES_DIR
-        }
-        
+        },
+    '/js':
+        {'tools.staticdir.on': True,
+         'tools.staticdir.dir': JS_DIR
+        }        
 }
 
 cherrypy.tree.mount(PeedyPee(),'/', config=config)
