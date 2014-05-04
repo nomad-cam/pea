@@ -124,23 +124,23 @@ class PeedyPee(object):
             return t.render(user=cookies['user'],position=cookies['title'],name=cookies['fname'])
         
     @cherrypy.expose
-    def admin(self):
+    def admin(self, **kws):
         if self.loggedin():
             cookies = self.returnCookies()
             
-            query = "SELECT userName FROM `person`"
-            #cur = db.cursor()
-            #cur.execute(query)
-            #result_people = cur.fetchall()
+            if 'e' in kws:
+                err = kws['e']
+            else:
+                err = ""
             
+            query = "SELECT userName,uid FROM `person`"
             result_people = self.runQuery(query,all=1)
-            #if (len(result_people) == 0):
-            #    result_people = False
-           
-            #return result_people
+
+            query = "SELECT groupName,gid FROM `group`"
+            result_group = self.runQuery(query,all=1)
             
             t = jinja_env.get_template('admin.html')
-            return t.render(name=cookies['fname'],people_dict=result_people)
+            return t.render(error=err,name=cookies['fname'],people_dict=result_people,group_dict=result_group)
         else:
             raise cherrypy.HTTPRedirect('/login')
 
@@ -213,6 +213,9 @@ class PeedyPee(object):
                 p_ismanager = kws['person_ismanager']
             except:
                 p_ismanager = 0
+            
+            if p_uname == "":
+                raise cherrypy.HTTPRedirect('/admin?e=noUser')
             
             cur_person = db.cursor()
 

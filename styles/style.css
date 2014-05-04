@@ -117,10 +117,13 @@ input[type='radio'], label {
 }
 
 #person_div {
-  
+  height: 200px;
+  width: 600px;
 }
 
 #group_div {
+  height: 200px;
+  width: 600px;
 }
 
 #people_list {
@@ -128,14 +131,36 @@ input[type='radio'], label {
   float:left;
 }
 
+#view_person {
+  position:relative;
+  left:18px
+}
+
+#edit_person {
+}
+
 #group_list {
   width: 200px;
   float: left;
 }
 
+#edit_group {
+  
+}
+
 #person_attributes {
   width:300px;
-  float:left;
+  float: left;
+}
+
+#person_select {
+  width: 200px;
+  float: left;
+}
+
+#group_select {
+  width: 200px;
+  float: left;
 }
 
 #group_attributes {
