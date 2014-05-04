@@ -135,7 +135,7 @@ class PeedyPee(object):
             side_dict = self.runQuery(query)[0]
             
             t = jinja_env.get_template('personal.html')
-            return t.render(sideDB=side_dict,user=cookies['user'],position=cookies['title'],name=cookies['fname'])
+            return t.render(sideDB=side_dict,user=cookies['user'],title=cookies['title'],name=cookies['fname'])
         
     @cherrypy.expose
     def admin(self, **kws):
@@ -148,7 +148,7 @@ class PeedyPee(object):
             userName = cookies['user']
             title = cookies['title']
             query = "SELECT * FROM `person` WHERE userName='%s'" % userName
-            side_dict = self.runQuery(query)[0]
+            user_dict = self.runQuery(query)[0]
             
             #check for the error flag and send to template            
             if 'e' in kws:
@@ -172,35 +172,77 @@ class PeedyPee(object):
                     grp = result_g_select['groupName']
                     ebl = result_g_select['enabled']
                 
-                    return t.render(sideDB=side_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
+                    return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
                             group_dict=result_group,groupName=grp,groupEnabled=ebl)
                     
                 except:            
-                    return t.render(sideDB=side_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
+                    return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
                             group_dict=result_group,groupName="",groupEnabled=0)
             
             #Person edit or pdp view has been initiated
             elif 'person_click' in kws:
                 
-                person_select = kws['person_list']
-                #check for person edit
-                if 'person_edit' in kws:
-                    try:
-                        pass
-                    except:
-                        pass
                 
-                #Check for person pdp view
-                if 'person_pdp' in kws:
+                
+                #check for person edit
+                if 'edit_person' in kws:
                     try:
-                        pass
+                        #collect their details
+                        person_select = kws['people_list']
+                        query = "SELECT * FROM `person` WHERE uid='%s'" % person_select
+                        pselect = self.runQuery(query, all=0)
+                        uname = pselect['userName']
+                        fname = pselect['firstName']
+                        lname = pselect['lastName']
+                        gname = pselect['groupName']
+                        manag = pselect['manager']
+                        admin = pselect['isAdmin']
+                        gmana = pselect['managedGroups']
+                        year  = pselect['year']
+                        cycle = pselect['cycle']
+                        isman = pselect['isManager']
+                        
+                        if isman:
+                            isman = "selected"
+                        else:
+                            isman = " "
+                            
+                        if admin:
+                            admin = "selected"
+                        else:
+                            admin = " "
+                    
+                        return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
+                                    group_dict=result_group,
+                                    quname=uname,qfname=fname,qlname=lname,qgname=gname,qmanag=manag,
+                                    qadmin=admin,qgmana=gmana,qyear=year,qcycle=cycle,qisman=isman)
                     except:
-                        pass
+                        return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
+                                    group_dict=result_group,
+                                    quname="",qfname="",qlname="",qgname="",qmanag="",
+                                    qadmin="",qgmana="",qyear="",qcycle="",qisman="")
                         
                 
-            #Just display the basic page if no other data is requested    
+                #Check for person pdp view
+                if 'view_person' in kws:
+                    try:
+                        #collect their details
+                        person_select = kws['people_list']
+                        query = "SELECT userName FROM `person` WHERE uid='%s'" % person_select
+                        pselect = self.runQuery(query, all=0)
+                        uname = pselect['userName']
+                    except:
+                        uname = ""
+                        
+                    urlstr = '/personalpdp/%s' % uname
+                    raise cherrypy.HTTPRedirect(urlstr)
+                        
+                return t.render(sideDB=user_dict,error="Reached the End...",title=title,name=cookies['fname'],
+                                people_dict=result_people,group_dict=result_group)
+                                
+                #Just display the basic page if no other data is requested    
             else:
-                return t.render(sideDB=side_dict,error=err,title=title,name=cookies['fname'],
+                return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],
                                 people_dict=result_people,group_dict=result_group)
         else:
             #If not logged in the redirect to login page
