@@ -146,6 +146,20 @@ class PeedyPee(object):
             cur.execute("SELECT * FROM `person`")
             
             return json.dumps(cur.fetchall())
+
+    def isUserDB(self,uname):
+        cur_check = db.cursor()
+        query = "SELECT userName FROM person WHERE userName = %s" % uname
+        cherrypy.log(query)
+        try:
+            cur_check.execute(query)
+            if cur_check.rowcount:
+                cherrypy.log(cur_check.rowcount)
+                return cur_check.fetchone()
+            else:
+                return False
+        except:
+            return False
             
     @cherrypy.expose
     def admin_update_person(self, **kws):
@@ -163,16 +177,29 @@ class PeedyPee(object):
                 p_ismanager = 0
             
             cur_person = db.cursor()
-            try:
-                #cur_person.execute("INSERT INTO `peedy-pee`.`person` (user,firstName,lastName,group,manager) VALUES ('%s','%s','%s','%s','%s')" % (p_uname,p_fname,p_lname,p_group,p_manager))
-                query = "INSERT INTO person (groupName,userName,firstName,lastName,manager) VALUES ('%s','%s','%s','%s','%s')" % (p_group,p_uname,p_fname,p_lname,p_manager)
-                cur_person.execute(query)
-                db.commit()
-            except MySQLdb.Error, e:
-                db.rollback()
-                return "Error! %d: %s"%(e.args[0],e.args[1])
+
+            if self.isUserDB(p_uname):
+                try:
+                    query = ("UPDATE person SET "
+                    "groupName='%s',userName='%s',firstName='%s',lastName='%s',manager='%s',isManager='%s' WHERE "
+                    "userName='%s'" % (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager))
+                    cur_person.execute(query)
+                    db.commit()
+                except MySQLdb.Error,e:
+                    db.rollback()
+                    return "Error! %d: %s" % (e.args[0],e.args[1])
+            
+            else:
+            
+                try:
+                    query = "INSERT INTO person (groupName,userName,firstName,lastName,manager,isManager) VALUES ('%s','%s','%s','%s','%s','%s')" % (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager)
+                    cur_person.execute(query)
+                    db.commit()
+                except MySQLdb.Error, e:
+                    db.rollback()
+                    return "Error! %d: %s"%(e.args[0],e.args[1])
                 
-            return kws
+            raise cherrypy.HTTPRedirect('/admin')
 
 #class Admin(object):
 #    @cherrypy.expose
