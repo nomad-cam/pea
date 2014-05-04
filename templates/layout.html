@@ -15,7 +15,7 @@
     </div>
     <div class='sidebar'>
         {% block sidebar %}
-        
+        {% if sideDB %}
         <p><b>Name: </b> {{ sideDB.firstName }} </p>
         <p><b>Title: </b> {{title}} </p>
         <p><b>Group: </b> {{sideDB.groupName}} </p>
@@ -44,6 +44,7 @@
         <br>
         <br>
         <a href='/logout'>Logout</a><br>
+        {% endif %}
         {% endblock %}
     </div>
     <div class='content'>

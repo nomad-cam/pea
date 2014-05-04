@@ -126,7 +126,7 @@ class PeedyPee(object):
             raise cherrypy.HTTPRedirect('/login')
 
     @cherrypy.expose
-    def personalpdp(self):
+    def personalpdp(self,user=None):
         if self.loggedin():
             cookies = self.returnCookies()
             
