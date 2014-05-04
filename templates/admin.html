@@ -70,8 +70,9 @@ $(document).ready(function() {
 <option value='{{ value.uid }}'>{{ value.userName }}</option>
 {% endfor %}
 </select><br>
-<button id="edit_person" >Edit Person</button>
-<button id="view_person" >View PDP</button>
+<button id="edit_person" type="submit" name="edit_person">Edit Person</button>
+<button id="view_person" type='submit' name='view_person' >View PDP</button>
+<input type='hidden' name='person_click' value=''>
 </form>
 
 <form id="person_attributes" action='/admin_update_person' method="POST">
@@ -90,16 +91,17 @@ $(document).ready(function() {
 <hr>
 <div id="group_div" class='clearfix'>
 <form id="group_select" action='/admin' method="POST">
-<select id="group_list" size="10">
+<select id="group_list" name='group_list' size="10">
 {% for value in group_dict %}
 <option value='{{ value.gid }} '>{{ value.groupName }}</option>
 {% endfor %}
 </select><br>
-<button id="edit_group" >Edit Group</button>
+<button id="edit_group" type='submit' name='edit_group'>Edit Group</button>
+<input type='hidden' name='group_click' value=''>
 </form>
 <form id='group_attributes' action='/admin_update_group' method='POST'>
-<label>Group Name: <input id="group_name" type="text" name="group_name"></label><br>
-<label>Enabled: <input type='checkbox' name='group_enabled'></label><br><p>
+<label>Group Name: <input id="group_name" type="text" name="group_name" value='{{ groupName }}'></label><br>
+<label>Enabled: <input type='checkbox' name='group_enabled' {% if groupEnabled %}checked{% endif %} ></label><br><p>
 <button id='save_group' class='right'>Save Group</button>
 </form>
 </div>

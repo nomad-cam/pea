@@ -125,6 +125,9 @@ class PeedyPee(object):
         
     @cherrypy.expose
     def admin(self, **kws):
+        
+        t = jinja_env.get_template('admin.html')
+        
         if self.loggedin():
             cookies = self.returnCookies()
             
@@ -132,14 +135,32 @@ class PeedyPee(object):
                 err = kws['e']
             else:
                 err = ""
-            
+
             query = "SELECT userName,uid FROM `person`"
             result_people = self.runQuery(query,all=1)
 
             query = "SELECT groupName,gid FROM `group`"
             result_group = self.runQuery(query,all=1)
             
-            t = jinja_env.get_template('admin.html')
+            #result_g_select = {'groupName':"",'groupChecked':'0'}
+            if 'group_click' in kws:
+                try:
+                    group_select = kws['group_list']
+                    query = "SELECT groupName,gid,enabled FROM `group` WHERE gid='%s'" % group_select
+                    result_g_select = self.runQuery(query, all=0)
+                    grp = result_g_select['groupName']
+                    ebl = result_g_select['enabled']
+                
+                    return t.render(error=err,name=cookies['fname'],people_dict=result_people,
+                            group_dict=result_group,groupName=grp,groupEnabled=ebl)
+                    
+                except:            
+                    return t.render(error=err,name=cookies['fname'],people_dict=result_people,
+                            group_dict=result_group,groupName="",groupEnabled=0)
+                
+                
+                
+            
             return t.render(error=err,name=cookies['fname'],people_dict=result_people,group_dict=result_group)
         else:
             raise cherrypy.HTTPRedirect('/login')
