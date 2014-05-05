@@ -20,7 +20,13 @@ JS_DIR = os.path.join(BASE_DIR,'js/')
 
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(TEMPLATE_DIR), autoescape=True)
 
-db = MySQLdb.connect(host='localhost',user='root',passwd='password',db='peedy-pee',cursorclass=MySQLdb.cursors.DictCursor)
+config_data = open('config.json')
+values = json.load(config_data)
+config_data.close()
+
+db = MySQLdb.connect(host=values['host'],user=values['dbuser'],
+                    passwd=values['password'],db=values['database'],
+                    cursorclass=MySQLdb.cursors.DictCursor)
 
 class PeedyPee(object):
     
