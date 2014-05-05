@@ -52,12 +52,13 @@ class PeedyPee(object):
             query = "SELECT * FROM `person` WHERE userName='%s'" % userName
             side_dict = self.runQuery(query)[0]
             
+            query = "SELECT * FROM `group` WHERE manager='%s'" % userName
+            g_dict = self.runQuery(query)
             #uManager = result[0]['manager']
             #return side_dict
             
             t = jinja_env.get_template('index.html')
-            return t.render(userName=userName,title=cookies['title'],
-                            firstName=cookies['fname'],sideDB=side_dict)
+            return t.render(sideDB=side_dict,groupDB=g_dict,userName=userName,title=cookies['title'],firstName=cookies['fname'])
         else:
             raise cherrypy.HTTPRedirect("/login")
             #t = jinja_env.get_template('login.html')
@@ -126,6 +127,12 @@ class PeedyPee(object):
             raise cherrypy.HTTPRedirect('/login')
 
     @cherrypy.expose
+    def changelog(self):
+        t = jinja_env.get_template('change.html')
+        return t.render()
+
+
+    @cherrypy.expose
     def personalpdp(self,user=None):
         if self.loggedin():
             cookies = self.returnCookies()
@@ -134,8 +141,11 @@ class PeedyPee(object):
             query = "SELECT * FROM `person` WHERE userName='%s'" % userName
             side_dict = self.runQuery(query)[0]
             
+            query = "SELECT * FROM `group` WHERE manager='%s'" % userName
+            g_dict = self.runQuery(query)
+            
             t = jinja_env.get_template('personal.html')
-            return t.render(sideDB=side_dict,user=cookies['user'],title=cookies['title'],name=cookies['fname'])
+            return t.render(sideDB=side_dict,groupDB=g_dict,user=cookies['user'],title=cookies['title'],name=cookies['fname'])
         
     @cherrypy.expose
     def admin(self, **kws):
@@ -149,6 +159,9 @@ class PeedyPee(object):
             title = cookies['title']
             query = "SELECT * FROM `person` WHERE userName='%s'" % userName
             user_dict = self.runQuery(query)[0]
+            
+            query = "SELECT * FROM `group` WHERE manager='%s'" % userName
+            g_dict = self.runQuery(query)
             
             #check for the error flag and send to template            
             if 'e' in kws:
@@ -173,11 +186,13 @@ class PeedyPee(object):
                     ebl = result_g_select['enabled']
                     man = result_g_select['manager']
                                         
-                    return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
+                    return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
+                            title=title,name=cookies['fname'],people_dict=result_people,
                             group_dict=result_group,groupName=grp,groupEnabled=ebl,groupManager=man)
                     
                 except:            
-                    return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
+                    return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
+                            title=title,name=cookies['fname'],people_dict=result_people,
                             group_dict=result_group,groupName="",groupEnabled=0,groupManager="")
             
             #Person edit or pdp view has been initiated
@@ -204,14 +219,14 @@ class PeedyPee(object):
                         cycle = pselect['cycle']
                         isman = pselect['isManager']
                                                                         
-                        return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
-                                    group_dict=result_group,
+                        return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
+                                    title=title,name=cookies['fname'],people_dict=result_people,group_dict=result_group,
                                     uname=uname,fname=fname,lname=lname,gname=gname,manag=manag,
                                     admin=admin,gmana=gmana,year=year,cycle=cycle,isman=isman)
                     except:
                         #user not in DB
-                        return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
-                                    group_dict=result_group,
+                        return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
+                                    title=title,name=cookies['fname'],people_dict=result_people,group_dict=result_group,
                                     uname="",fname="",lname="",gname="",manag="",
                                     admin="",gmana="",year="",cycle="",isman="")
                         
@@ -230,12 +245,12 @@ class PeedyPee(object):
                     urlstr = '/personalpdp/%s' % uname
                     raise cherrypy.HTTPRedirect(urlstr)
                         
-                return t.render(sideDB=user_dict,error="Reached the End...",title=title,name=cookies['fname'],
+                return t.render(sideDB=user_dict,groupDB=g_dict,error="Reached the End...",title=title,name=cookies['fname'],
                                 people_dict=result_people,group_dict=result_group)
                                 
                 #Just display the basic page if no other data is requested    
             else:
-                return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],
+                return t.render(sideDB=user_dict,groupDB=g_dict,error=err,title=title,name=cookies['fname'],
                                 people_dict=result_people,group_dict=result_group)
         else:
             #If not logged in the redirect to login page
@@ -359,7 +374,7 @@ class PeedyPee(object):
                 
             self.runQuery(query,read=0)
             
-            urlStr = '/admin?e=Group Data Updated... %s' % query
+            urlStr = '/admin?e=Group Data Updated'
             raise cherrypy.HTTPRedirect(urlStr)
             
         else:

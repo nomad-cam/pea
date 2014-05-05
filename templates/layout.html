@@ -30,10 +30,13 @@
         <br>
         <br>
         {% if sideDB.isManager %}
-        {% if sideDB.managedGroups %}
-        {% for group in sideDB.managedGroups %}
-        Edit Group: <a href='/grouppdp/{{ group.groupUrl }}'> {{ group.groupName }} </a>
+        {% if groupDB %}
+        
+        Edit Your Groups<br>
+        {% for value in groupDB %}
+        -  <a href='/grouppdp/{{ value.urlName }}'> {{ value.groupName }} </a><br>
         {% endfor %}
+        
         {% endif %}
         {% endif %}
         <br>
