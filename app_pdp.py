@@ -167,17 +167,18 @@ class PeedyPee(object):
             if 'group_click' in kws:
                 try:
                     group_select = kws['group_list']
-                    query = "SELECT groupName,gid,enabled FROM `group` WHERE gid='%s'" % group_select
+                    query = "SELECT groupName,gid,enabled,manager FROM `group` WHERE gid='%s'" % group_select
                     result_g_select = self.runQuery(query, all=0)
                     grp = result_g_select['groupName']
                     ebl = result_g_select['enabled']
-                
+                    man = result_g_select['manager']
+                                        
                     return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
-                            group_dict=result_group,groupName=grp,groupEnabled=ebl)
+                            group_dict=result_group,groupName=grp,groupEnabled=ebl,groupManager=man)
                     
                 except:            
                     return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
-                            group_dict=result_group,groupName="",groupEnabled=0)
+                            group_dict=result_group,groupName="",groupEnabled=0,groupManager="")
             
             #Person edit or pdp view has been initiated
             elif 'person_click' in kws:
@@ -202,28 +203,17 @@ class PeedyPee(object):
                         year  = pselect['year']
                         cycle = pselect['cycle']
                         isman = pselect['isManager']
-                        
-                        #err="%s,%s,%s,%s"% (err,uname,fname,lname)
-                        
-                        if isman:
-                            isman = "selected"
-                        else:
-                            isman = " "
-                            
-                        if admin:
-                            admin = "selected"
-                        else:
-                            admin = " "
-                    
+                                                                        
                         return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
                                     group_dict=result_group,
-                                    quname=uname,qfname=fname,qlname=lname,qgname=gname,qmanag=manag,
-                                    qadmin=admin,qgmana=gmana,qyear=year,qcycle=cycle,qisman=isman)
+                                    uname=uname,fname=fname,lname=lname,gname=gname,manag=manag,
+                                    admin=admin,gmana=gmana,year=year,cycle=cycle,isman=isman)
                     except:
+                        #user not in DB
                         return t.render(sideDB=user_dict,error=err,title=title,name=cookies['fname'],people_dict=result_people,
                                     group_dict=result_group,
-                                    quname="",qfname="",qlname="",qgname="",qmanag="",
-                                    qadmin="",qgmana="",qyear="",qcycle="",qisman="")
+                                    uname="",fname="",lname="",gname="",manag="",
+                                    admin="",gmana="",year="",cycle="",isman="")
                         
                 
                 #Check for person pdp view
@@ -271,36 +261,48 @@ class PeedyPee(object):
             result = self.runQuery(p_query)   
             return json.dumps(result)
     
-    #@cherrypy.expose
+    @cherrypy.expose
     #Check if the user 'uname' is already in the database
     def isUserDB(self,uname):
-        cur_check = db.cursor()
+        #cur_check = db.cursor()
         query = "SELECT userName FROM `person` WHERE userName = '%s'" % uname
-        cherrypy.log(query)
-        try:
-            cur_check.execute(query)
-            if cur_check.rowcount:
-                cherrypy.log(cur_check.rowcount)
-                return cur_check.fetchone()
-            else:
-                return False
-        except:
-            #return "Error! %d: %s" % (e.args[0],e.args[1])
+
+        result = self.runQuery(query,all=0)
+        if len(result):
+            return result
+        else:
             return False
+            
+        #try:
+        #    cur_check.execute(query)
+        #    if cur_check.rowcount:
+        #        #cherrypy.log(cur_check.rowcount)
+        #        return cur_check.fetchone()
+        #    else:
+        #        return False
+        #except:
+        #    #return "Error! %d: %s" % (e.args[0],e.args[1])
+        #    return False
     
     @cherrypy.expose
     #Chewck if gname is in the database already        
     def isGroupDB(self,gname):
-        cur_check = db.cursor()
+        #cur_check = db.cursor()
         query = "SELECT groupName FROM `group` WHERE groupName = '%s'" % gname
-        try:
-            cur_check.execute(query)
-            if cur_check.rowcount:
-                return cur_check.fetchone()
-            else:
-                return False
-        except:
+        
+        result = self.runQuery(query,all=0)
+        if len(result):
+            return result
+        else:
             return False
+        #try:
+        #    cur_check.execute(query)
+        #    if cur_check.rowcount:
+        #        return cur_check.fetchone()
+        #    else:
+        #        return False
+        #except:
+        #    return False
         
     
     @cherrypy.expose
@@ -327,6 +329,7 @@ class PeedyPee(object):
     def admin_update_group(self, **kws):
         if self.loggedin():
             g_name = kws['group_name']
+            g_man = kws['group_manager']
             
             if 'group_enabled' in kws:
                 g_enable = kws['group_enabled']
@@ -335,25 +338,32 @@ class PeedyPee(object):
             
             g_url = g_name.lower().replace(" ","_")
             
+            #read the the radio button and convert to int
             if g_enable == 'on':
                 g_enable = 1
             else:
                 g_enable = 0
             
+            #group name not specified
             if g_name == "":
                 raise cherrypy.HTTPRedirect('/admin?e=noGroup')
             
+            #Check if already in the DB
             if self.isGroupDB(g_name):
-                query = ("UPDATE `group` SET groupName='%s',enabled='%s',urlName='%s'WHERE groupName='%s'" 
-                        % (g_name,g_enable,g_url,g_name))
+                query = ("UPDATE `group` SET groupName='%s',enabled='%s',urlName='%s',manager='%s' WHERE groupName='%s'" 
+                        % (g_name,g_enable,g_url,g_man,g_name))
+            #Else update the group already in the DB
             else:
-                query = "INSERT INTO `group` (groupName,enabled,urlName) VALUES ('%s','%s','%s')" % (g_name,g_enable,g_url)
+                query = ("INSERT INTO `group` (groupName,enabled,urlName,manager) VALUES ('%s','%s','%s','%s')" 
+                        % (g_name,g_enable,g_url,g_man))
                 
             self.runQuery(query,read=0)
-                        
-            raise cherrypy.HTTPRedirect('/admin?e=Group Data Updated')
+            
+            urlStr = '/admin?e=Group Data Updated... %s' % query
+            raise cherrypy.HTTPRedirect(urlStr)
             
         else:
+            #Not logged in redirect...
             raise cherrypy.HTTPRedirect('/login')
     
     @cherrypy.expose
@@ -368,39 +378,32 @@ class PeedyPee(object):
             p_fname = kws['person_firstname']
             p_uname = kws['person_username']
             p_group = kws['person_group']
-            try:
-                p_ismanager = kws['person_ismanager']
-            except:
+            
+            if 'person_ismanager' in kws:
+                #p_ismanager = kws['person_ismanager']
+                p_ismanager = 1
+            else:
+                #p_ismanager = 'off'
                 p_ismanager = 0
             
             if p_uname == "":
                 raise cherrypy.HTTPRedirect('/admin?e=noUser')
             
-            cur_person = db.cursor()
 
             #If user already in Database the update, else add a new user
             if self.isUserDB(p_uname):
-                try:
+
                     query = ("UPDATE person SET "
                              "groupName='%s',userName='%s',firstName='%s',lastName='%s',manager='%s',isManager='%s' "
                              "WHERE userName='%s'" % (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager,p_uname))
-                    cur_person.execute(query)
-                    db.commit()
-                except MySQLdb.Error,e:
-                    db.rollback()
-                    return "Error! %d: %s" % (e.args[0],e.args[1])
-            
             else:
-            
-                try:
                     query = "INSERT INTO person (groupName,userName,firstName,lastName,manager,isManager) VALUES ('%s','%s','%s','%s','%s','%s')" % (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager)
-                    cur_person.execute(query)
-                    db.commit()
-                except MySQLdb.Error, e:
-                    db.rollback()
-                    return "Error! %d: %s"%(e.args[0],e.args[1])
-                
-            raise cherrypy.HTTPRedirect('/admin')
+
+            
+            self.runQuery(query,read=0)
+
+            urlStr = '/admin?e=%s %s'%(query,self.isUserDB(p_uname))
+            raise cherrypy.HTTPRedirect(urlStr)
 
 #class Admin(object):
 #    @cherrypy.expose
