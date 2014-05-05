@@ -12,6 +12,7 @@ import MySQLdb.cursors
 import ldap
 import json
 import string
+from datetime import date
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates/')
@@ -289,7 +290,8 @@ class PeedyPee(object):
         query = "SELECT userName FROM `person` WHERE userName = '%s'" % uname
 
         result = self.runQuery(query,all=0)
-        if len(result):
+        if result:
+        #if len(result):
             return result
         else:
             return False
@@ -312,7 +314,8 @@ class PeedyPee(object):
         query = "SELECT groupName FROM `group` WHERE groupName = '%s'" % gname
         
         result = self.runQuery(query,all=0)
-        if len(result):
+        #if len(result):
+        if result:
             return result
         else:
             return False
@@ -400,6 +403,14 @@ class PeedyPee(object):
             p_uname = kws['person_username']
             p_group = kws['person_group']
             
+            #pdp year starts at start of pdp year (financial year)
+            #so to get in the right year cycle - need to set last year if in the new year
+            #although only when creating a new user ie INSERT...
+            if date.today().month < 6:
+                p_year = date.today().year - 1
+            else:
+                p_year = date.today().year
+            
             if 'person_ismanager' in kws:
                 #p_ismanager = kws['person_ismanager']
                 p_ismanager = 1
@@ -418,12 +429,14 @@ class PeedyPee(object):
                              "groupName='%s',userName='%s',firstName='%s',lastName='%s',manager='%s',isManager='%s' "
                              "WHERE userName='%s'" % (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager,p_uname))
             else:
-                    query = "INSERT INTO person (groupName,userName,firstName,lastName,manager,isManager) VALUES ('%s','%s','%s','%s','%s','%s')" % (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager)
+                    query = ("INSERT INTO person (groupName,userName,firstName,lastName,manager,isManager,year) VALUES "
+                             "('%s','%s','%s','%s','%s','%s','%s')" % 
+                             (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager,p_year))
 
             
             self.runQuery(query,read=0)
 
-            urlStr = '/admin?e=%s %s'%(query,self.isUserDB(p_uname))
+            urlStr = '/admin?e=User Data Updated'
             raise cherrypy.HTTPRedirect(urlStr)
 
 #class Admin(object):
