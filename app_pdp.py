@@ -191,6 +191,7 @@ class PeedyPee(object):
                         person_select = kws['people_list']
                         query = "SELECT * FROM `person` WHERE uid='%s'" % person_select
                         pselect = self.runQuery(query, all=0)
+                        #err=pselect
                         uname = pselect['userName']
                         fname = pselect['firstName']
                         lname = pselect['lastName']
@@ -201,6 +202,8 @@ class PeedyPee(object):
                         year  = pselect['year']
                         cycle = pselect['cycle']
                         isman = pselect['isManager']
+                        
+                        #err="%s,%s,%s,%s"% (err,uname,fname,lname)
                         
                         if isman:
                             isman = "selected"
