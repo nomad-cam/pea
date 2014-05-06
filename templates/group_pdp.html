@@ -6,20 +6,28 @@
 
 
 {% block content %}
-
+<div class='error'>
+{{ err }}
+</div>
 
 <h2>Group PDP Admin</h2>
+<form action='/grouppdp_initialise' method='POST'>
 <fieldset class='new-goals'>
 <legend><b>Initialise New Goals</b></legend>
 <label>Start Year:  <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'></label>
+<input type='hidden' name='group_name' value='{{ group_url }}'>
 <input type='submit' value='Create'>
 </fieldset>
+</form>
 
+<form action='grouppdp_changeyear' method='POST'>
 <fieldset class='new-goals'>
 <legend><b>Select Year Goals</b></legend>
 <label>Year:  <input type="text" name='year_goals' size='10' title='The year at the start of the pdp cycle'></label>
+<input type='hidden' name='group_name' value='{{ group_url }}'>
 <input type='submit' value='Select'>
 </fieldset><p>
+</form>
 
 <br><br>
 <div class='clearfix'></div>

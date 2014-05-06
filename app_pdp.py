@@ -158,9 +158,13 @@ class PeedyPee(object):
             raise cherrypy.HTTPRedirect('/login')
 
     @cherrypy.expose
-    def grouppdp(self,group=None,year=None):
+    def grouppdp(self,group=None,year=None,**kws):
         if self.loggedin():
             cookies = self.returnCookies()
+            
+            err = ''
+            if 'e' in kws:
+                err = kws['e']
             
             userName = cookies['user']
             query = "SELECT * FROM `person` WHERE userName='%s'" % userName
@@ -169,11 +173,46 @@ class PeedyPee(object):
             query = "SELECT * FROM `group` WHERE manager='%s'" % userName
             g_dict = self.runQuery(query)
             
+            
+            
             t = jinja_env.get_template('group_pdp.html')
-            return t.render(sideDB=side_dict,groupDB=g_dict,user=cookies['user'],title=cookies['title'],name=cookies['fname'])
+            return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
+                            user=cookies['user'],title=cookies['title'],name=cookies['fname'],
+                            group_url=group)
             
         else:
             raise cherrypy.HTTPRedirect('/login')
+
+    @cherrypy.expose
+    def grouppdp_initialise(self,**kws):
+        if self.loggedin():
+                        
+            groupName = kws['group_name'] #should be reference to groupUrl name
+            yearSelect = kws['init_goals']
+            
+            if yearSelect == "":
+                urlStr = "/grouppdp/%s?e=No Year Selected" % groupName
+                raise cherrypy.HTTPRedirect(urlStr)
+            
+            query = "SELECT gid FROM `group` WHERE urlName='%s'" % groupName
+            g_ref = self.runQuery(query,all=0)
+            
+            query = "SELECT gid FROM `group-pdp-data WHERE year='%s'" % yearSelect
+            result = self.runQuery(query,all=0)
+            
+            #test if year in database already
+            if len(result):
+                urlStr = ('/grouppdp/%s?e=Goals already initialised for year %s' %
+                           (groupName,yearSelect))
+            else:    
+                query = ("INSERT INTO `group-pdp-data` (gid,year,cycle) "
+                        "VALUES ('%s','%s','0')" % (g_ref['gid'],yearSelect))
+                self.runQuery(query,read=0)
+            
+                urlStr = ("/grouppdp/%s/%s?e=Group PDP Initialised %s" % 
+                         (groupName,yearSelect,yearSelect))
+            
+            raise cherrypy.HTTPRedirect(urlStr)
         
     @cherrypy.expose
     def admin(self, **kws):
