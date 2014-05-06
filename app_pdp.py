@@ -151,8 +151,29 @@ class PeedyPee(object):
             query = "SELECT * FROM `group` WHERE manager='%s'" % userName
             g_dict = self.runQuery(query)
             
-            t = jinja_env.get_template('personal.html')
+            t = jinja_env.get_template('personal_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,user=cookies['user'],title=cookies['title'],name=cookies['fname'])
+            
+        else:
+            raise cherrypy.HTTPRedirect('/login')
+
+    @cherrypy.expose
+    def grouppdp(self,group=None,year=None):
+        if self.loggedin():
+            cookies = self.returnCookies()
+            
+            userName = cookies['user']
+            query = "SELECT * FROM `person` WHERE userName='%s'" % userName
+            side_dict = self.runQuery(query)[0]
+            
+            query = "SELECT * FROM `group` WHERE manager='%s'" % userName
+            g_dict = self.runQuery(query)
+            
+            t = jinja_env.get_template('group_pdp.html')
+            return t.render(sideDB=side_dict,groupDB=g_dict,user=cookies['user'],title=cookies['title'],name=cookies['fname'])
+            
+        else:
+            raise cherrypy.HTTPRedirect('/login')
         
     @cherrypy.expose
     def admin(self, **kws):

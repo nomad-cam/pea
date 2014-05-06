@@ -116,6 +116,16 @@ input[type='radio'], label {
   clear:both;
 }
 
+.new-goals{
+  float:left;
+  width:300px;
+}
+
+.select-year{
+  float:left;
+  width:300px;
+}
+
 #person_div {
   height: 200px;
   width: 600px;
