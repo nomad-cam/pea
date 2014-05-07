@@ -197,7 +197,7 @@ class PeedyPee(object):
             query = "SELECT gid FROM `group` WHERE urlName='%s'" % groupName
             g_ref = self.runQuery(query,all=0)
             
-            query = "SELECT gid FROM `group-pdp-data WHERE year='%s'" % yearSelect
+            query = "SELECT gid FROM `group-pdp-data` WHERE (year='%s' AND gid='%s')" % (yearSelect, g_ref['gid'])
             result = self.runQuery(query,all=0)
             
             #test if year in database already
