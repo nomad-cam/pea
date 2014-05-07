@@ -157,6 +157,15 @@ class PeedyPee(object):
         else:
             raise cherrypy.HTTPRedirect('/login')
 
+    def default_year(self):
+        #pdp year starts at start of pdp year (financial year)
+        #so to get in the right year cycle - need to set last year if in the new year
+        
+        if date.today().month < 6:
+            return date.today().year - 1
+        else:
+            return date.today().year
+
     @cherrypy.expose
     def grouppdp(self,group=None,year=None,**kws):
         if self.loggedin():
@@ -166,6 +175,9 @@ class PeedyPee(object):
             if 'e' in kws:
                 err = kws['e']
             
+            if year == None:
+                year = self.default_year()
+            
             userName = cookies['user']
             query = "SELECT * FROM `person` WHERE userName='%s'" % userName
             side_dict = self.runQuery(query)[0]
@@ -173,12 +185,21 @@ class PeedyPee(object):
             query = "SELECT * FROM `group` WHERE manager='%s'" % userName
             g_dict = self.runQuery(query)
             
+            query = ("SELECT gid FROM `group` WHERE urlName='%s'") % group
+            groupID = self.runQuery(query, all=0)
             
+            query = ("SELECT MAX(cycle) FROM `group-pdp-data` WHERE (gid='%s' AND year='%s')"
+                    % (groupID,year))
+            current_cycle = self.runQuery(query, all=0)
+            
+            query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND year='%s' AND cycle='%s'"
+                    % (groupID,year,current_cycle))
+            gpdps = self.runQuery(query)
             
             t = jinja_env.get_template('group_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
                             user=cookies['user'],title=cookies['title'],name=cookies['fname'],
-                            group_url=group)
+                            group_url=group,groupPDPs=gpdps)
             
         else:
             raise cherrypy.HTTPRedirect('/login')
@@ -201,19 +222,35 @@ class PeedyPee(object):
             result = self.runQuery(query,all=0)
             
             #test if year in database already
-            if len(result):
-                urlStr = ('/grouppdp/%s?e=Goals already initialised for year %s' %
-                           (groupName,yearSelect))
+            if result:
+                urlStr = ('/grouppdp/%s/%s?e=Goals already initialised for year %s' %
+                           (groupName,yearSelect,yearSelect))
             else:    
                 query = ("INSERT INTO `group-pdp-data` (gid,year,cycle) "
                         "VALUES ('%s','%s','0')" % (g_ref['gid'],yearSelect))
-                self.runQuery(query,read=0)
+                for i in range(4):
+                    self.runQuery(query,read=0)
             
                 urlStr = ("/grouppdp/%s/%s?e=Group PDP Initialised %s" % 
                          (groupName,yearSelect,yearSelect))
             
             raise cherrypy.HTTPRedirect(urlStr)
-        
+    
+    @cherrypy.expose
+    def grouppdp_changeyear(self,**kws):
+        if self.loggedin():
+            
+            name = kws['group_name']
+            year = kws['year_goals']
+            
+            if year == "":
+                urlStr = ("/grouppdp/%s?e=No Year Selected" % name)
+            else:
+                urlStr = ("/grouppdp/%s/%s" % (name,year))
+                
+            raise cherrypy.HTTPRedirect(urlStr)
+    
+    
     @cherrypy.expose
     def admin(self, **kws):
         
@@ -463,13 +500,8 @@ class PeedyPee(object):
             p_uname = kws['person_username']
             p_group = kws['person_group']
             
-            #pdp year starts at start of pdp year (financial year)
-            #so to get in the right year cycle - need to set last year if in the new year
-            #although only when creating a new user ie INSERT...
-            if date.today().month < 6:
-                p_year = date.today().year - 1
-            else:
-                p_year = date.today().year
+                
+            p_year = self.default_year()
             
             if 'person_ismanager' in kws:
                 #p_ismanager = kws['person_ismanager']

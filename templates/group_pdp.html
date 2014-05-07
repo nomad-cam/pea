@@ -20,7 +20,7 @@
 </fieldset>
 </form>
 
-<form action='grouppdp_changeyear' method='POST'>
+<form action='/grouppdp_changeyear' method='POST'>
 <fieldset class='new-goals'>
 <legend><b>Select Year Goals</b></legend>
 <label>Year:  <input type="text" name='year_goals' size='10' title='The year at the start of the pdp cycle'></label>
@@ -47,10 +47,10 @@
         <th class="th_even"> Training? </th>
     </tr>
     <tr>
-{% for goal in group_goals %}
-        <td><input type='text' name='group_goal' size='30' value='goal name'></td>
+{% for goal in gpdps %}
+        <td><input type='text' name='group_goal' size='30' value='{{ goal.goalTitle }}'></td>
         <td><textarea name='group_description' rows='4' cols='40'>goal description</textarea></td>
-        <td><input type='text' name='group_owners' size='10' value='goal owners'></td>
+        <td><input type='text' name='group_owners' size='10' value='{{ goal.owners }}'></td>
         <td><input type='text' name='group_deadline' size='10' value=''></td>
         <td><input type='number' name='group_budget' size='10' value=''></td>
         <td><label><input type='radio' name='group_training' value='true' checked='...'>Yes</label>
