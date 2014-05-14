@@ -188,21 +188,23 @@ class PeedyPee(object):
             query = "SELECT * FROM `group` WHERE manager='%s'" % userName
             g_dict = self.runQuery(query)
             
-            query = ("SELECT gid FROM `group` WHERE urlName='%s'") % group
+            query = ("SELECT gid, groupName FROM `group` WHERE urlName='%s'") % group
             groupID = self.runQuery(query, all=0)
             
-            query = ("SELECT MAX(cycle) FROM `group-pdp-data` WHERE (gid='%s' AND year='%s')"
-                    % (groupID,year))
+            query = ("SELECT MAX(cycle) AS cycle FROM `group-pdp-data` WHERE (gid='%s' AND year='%s')"
+                    % (groupID['gid'],year))
             current_cycle = self.runQuery(query, all=0)
             
-            query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND year='%s' AND cycle='%s'"
-                    % (groupID,year,current_cycle))
-            gpdps = self.runQuery(query)
+            
+            query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND year='%s' AND cycle='%s')"
+                    % (groupID['gid'],year,current_cycle['cycle']))
+            gpdps = self.runQuery(query, all=1)
+            
             
             t = jinja_env.get_template('group_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
                             user=cookies['user'],title=cookies['title'],name=cookies['fname'],
-                            group_url=group,groupPDPs=gpdps)
+                            group_url=group,groupPDPs=gpdps,groupName=groupID['groupName'])
             
         else:
             raise cherrypy.HTTPRedirect('/login')
@@ -362,6 +364,41 @@ class PeedyPee(object):
         else:
             #If not logged in the redirect to login page
             raise cherrypy.HTTPRedirect('/login')
+
+    @cherrypy.expose
+    # An admin script to update the users database from the ldap source...
+    def updateDBldap(self,**kws):
+        if self.loggedin():
+            
+            if (("username" in kws) and ("password" in kws)):
+                user = kws['username']
+                passw = kws['password']
+            
+            
+            ldap_server = values['LDAP']['ldap_server']
+            acct_sx = values['LDAP']['acct_sx']
+            base_dn = values['LDAP']['base_dn']
+                
+            connect = ldap.open(ldap_server)
+        
+            try:
+                connect.simple_bind_s(user+acct_sx,passw)
+            
+                result = connect.search_s(base_dn,ldap.SCOPE_SUBTREE, 
+                        '(&(objectclass=User) (sAMAccountName=*))', 
+                        ['title','displayName','givenName'])
+            
+                position = result[0][1]['title'][0]
+                name = result[0][1]['givenName'][0]
+            
+                raise cherrypy.HTTPRedirect('/admin')
+            
+            except ldap.LDAPError:
+                connect.unbind_s()
+                error = 'Unable to process Request. Please try again...'
+            
+                raise cherrypy.HTTPRedirect('/admin')
+            
 
     @cherrypy.expose
     def groups(self):
@@ -547,7 +584,10 @@ cherrypy.config.update({
 config = {
     '/':
         {'tools.staticdir.debug': True,
-         'log.screen': True
+         'log.screen': True,
+         'tools.sessions.on': True,
+         'tools.sessions.type': "ram",
+         'tools.sessions.timeout': 360
         },
     '/templates':
         {'tools.staticdir.on': True,
