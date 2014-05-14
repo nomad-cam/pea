@@ -36,7 +36,7 @@
 <hr>
 
 <b>Group goals, place a blurb here </b><br><br>
-<from action="/grouppdp/{{groupUrl}}" method='POST'>
+<form action="/grouppdp/{{ group_url }}" method='POST'>
 <table class="grouptable">
     <tr>
         <th class="th_odd"> Group Goal </th>
@@ -62,8 +62,8 @@
     
 </table>
 <br><br>
-<input type='submit' value="Add Row">
-<input type='submit' value="Save Data">
+<input type='submit' name="add_group_row" value="Add Row">
+<input type='submit' name="save_group_data" "value="Save Data">
 </form>
 <br>
 <br>

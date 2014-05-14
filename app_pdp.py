@@ -188,23 +188,39 @@ class PeedyPee(object):
             query = "SELECT * FROM `group` WHERE manager='%s'" % userName
             g_dict = self.runQuery(query)
             
-            query = ("SELECT gid, groupName FROM `group` WHERE urlName='%s'") % group
+                       
+            query = ("SELECT gid, groupName, manager FROM `group` WHERE urlName='%s'") % group
             groupID = self.runQuery(query, all=0)
             
             query = ("SELECT MAX(cycle) AS cycle FROM `group-pdp-data` WHERE (gid='%s' AND year='%s')"
                     % (groupID['gid'],year))
             current_cycle = self.runQuery(query, all=0)
             
+            if 'add_group_row' in kws:
+                # First save data then add a new line
+                query = ("UPDATE `group-pdp-data` "
+                         "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', budget='%s', training='%s'"
+                         "WHERE zid='13'" 
+                         % (kws['group_goal'],kws['group_owners'],kws['group_description'],
+                         kws['group_deadline'],kws['group_budget'],kws['group_training']))
+                
+                query = ("INSERT INTO `group-pdp-data` (gid, year, cycle)"
+                         "VALUES (%s,%s,%s)" % groupID['gid'],year,current_cycle['cycle'])
+                self.runQury(query,read=0)
+                raise cherrypy.HTTPRedirect('/')
+            
             
             query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND year='%s' AND cycle='%s')"
                     % (groupID['gid'],year,current_cycle['cycle']))
             gpdps = self.runQuery(query, all=1)
             
+
+            
             
             t = jinja_env.get_template('group_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
                             user=cookies['user'],title=cookies['title'],name=cookies['fname'],
-                            group_url=group,groupPDPs=gpdps,groupName=groupID['groupName'])
+                            group_url=group,groupPDPs=gpdps,groupName=groupID['groupName'],manager=groupID['manager'])
             
         else:
             raise cherrypy.HTTPRedirect('/login')
