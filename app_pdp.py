@@ -25,8 +25,8 @@ config_data = open('config.json')
 values = json.load(config_data)
 config_data.close()
 
-db = MySQLdb.connect(host=values['host'],user=values['dbuser'],
-                    passwd=values['password'],db=values['database'],
+db = MySQLdb.connect(host=values['DB']['host'],user=values['DB']['dbuser'],
+                    passwd=values['DB']['password'],db=values['DB']['database'],
                     cursorclass=MySQLdb.cursors.DictCursor)
 
 class PeedyPee(object):
@@ -93,9 +93,12 @@ class PeedyPee(object):
         #if "password" in kws:
             passw = kws['password']
             
-        ldap_server = "10.7.0.243"    # ldap://
-        acct_sx = "@synchrotron.org.au"
-        base_dn = 'dc=synchrotron,dc=org,dc=au'
+        #ldap_server = "10.7.0.243"    # ldap://
+        #acct_sx = "@synchrotron.org.au"
+        #base_dn = 'dc=synchrotron,dc=org,dc=au'
+        ldap_server = values['LDAP']['ldap_server']
+        acct_sx = values['LDAP']['acct_sx']
+        base_dn = values['LDAP']['base_dn']
                 
         connect = ldap.open(ldap_server)
         
