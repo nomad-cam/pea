@@ -52,10 +52,15 @@ class PeedyPee(object):
             return False
 
     @cherrypy.expose
-    def index(self):
+    def index(self,**kws):
         if self.loggedin():
             cookies = self.returnCookies()
             userName = cookies['user']
+            
+            err = ''
+            if 'e' in kws:
+                err = kws['e']
+            
             query = "SELECT * FROM `person` WHERE userName='%s'" % userName
             side_dict = self.runQuery(query)[0]
             
@@ -65,7 +70,8 @@ class PeedyPee(object):
             #return side_dict
             
             t = jinja_env.get_template('index.html')
-            return t.render(sideDB=side_dict,groupDB=g_dict,userName=userName,title=cookies['title'],firstName=cookies['fname'])
+            return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
+                            userName=userName,title=cookies['title'],firstName=cookies['fname'])
         else:
             raise cherrypy.HTTPRedirect("/login")
             #t = jinja_env.get_template('login.html')
@@ -93,12 +99,12 @@ class PeedyPee(object):
         #if "password" in kws:
             passw = kws['password']
             
-        #ldap_server = "10.7.0.243"    # ldap://
-        #acct_sx = "@synchrotron.org.au"
-        #base_dn = 'dc=synchrotron,dc=org,dc=au'
-        ldap_server = values['LDAP']['ldap_server']
-        acct_sx = values['LDAP']['acct_sx']
-        base_dn = values['LDAP']['base_dn']
+        ldap_server = "10.7.0.243"    # ldap://
+        acct_sx = "@synchrotron.org.au"
+        base_dn = 'dc=synchrotron,dc=org,dc=au'
+        #ldap_server = values['LDAP']['ldap_server']
+        #acct_sx = values['LDAP']['acct_sx']
+        #base_dn = values['LDAP']['base_dn']
                 
         connect = ldap.open(ldap_server)
         
@@ -198,28 +204,44 @@ class PeedyPee(object):
             
             if 'add_group_row' in kws:
                 # First save data then add a new line
-                query = ("UPDATE `group-pdp-data` "
-                         "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', budget='%s', training='%s'"
-                         "WHERE zid='13'" 
-                         % (kws['group_goal'],kws['group_owners'],kws['group_description'],
-                         kws['group_deadline'],kws['group_budget'],kws['group_training']))
+                for j in range(len(kws['zid[]'])):
+                    query = ("UPDATE `group-pdp-data` "
+                         "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', budget='%s', training='%s' "
+                         "WHERE zid='%s'" 
+                         % (kws['group_goal[]'][j],kws['group_owners[]'][j],kws['group_description[]'][j],
+                         kws['group_deadline[]'][j],kws['group_budget[]'][j],kws['group_training[]'][j],kws['zid[]'][j]))
+                         
+                    self.runQuery(query,read=0)
+                    
                 
+                # Second add a blank line to the DB before redirecting to same page
                 query = ("INSERT INTO `group-pdp-data` (gid, year, cycle)"
-                         "VALUES (%s,%s,%s)" % groupID['gid'],year,current_cycle['cycle'])
-                self.runQury(query,read=0)
-                raise cherrypy.HTTPRedirect('/')
+                         "VALUES (%s,%s,%s)" % (groupID['gid'], year, current_cycle['cycle']))
+                self.runQuery(query,read=0)
+                
+                raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'% (group,year,err))
             
+            elif 'save_group_data' in kws:
+                # Save the current data
+                for j in range(len(kws['zid[]'])):
+                     query = ("UPDATE `group-pdp-data` "
+                         "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', budget='%s', training='%s' "
+                         "WHERE zid='%s'" 
+                         % (kws['group_goal[]'][j],kws['group_owners[]'][j],kws['group_description[]'][j],
+                         kws['group_deadline[]'][j],kws['group_budget[]'][j],kws['group_training[]'][j],kws['zid[]'][j]))
+                         
+                     self.runQuery(query,read=0)
+                
+                raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'% (group,year,err))                   
             
             query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND year='%s' AND cycle='%s')"
-                    % (groupID['gid'],year,current_cycle['cycle']))
+                    % (groupID['gid'], year, current_cycle['cycle']))
             gpdps = self.runQuery(query, all=1)
             
-
-            
-            
+           
             t = jinja_env.get_template('group_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
-                            user=cookies['user'],title=cookies['title'],name=cookies['fname'],
+                            user=cookies['user'],title=cookies['title'],name=cookies['fname'],year=year,cycle=current_cycle['cycle'],
                             group_url=group,groupPDPs=gpdps,groupName=groupID['groupName'],manager=groupID['manager'])
             
         else:
