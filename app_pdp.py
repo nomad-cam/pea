@@ -18,6 +18,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates/')
 STYLES_DIR = os.path.join(BASE_DIR,'styles/')
 JS_DIR = os.path.join(BASE_DIR,'js/')
+IMG_DIR = os.path.join(BASE_DIR,'images/')
 
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(TEMPLATE_DIR), autoescape=True)
 
@@ -638,7 +639,11 @@ config = {
     '/js':
         {'tools.staticdir.on': True,
          'tools.staticdir.dir': JS_DIR
-        }        
+        },
+    '/images':
+        {'tools.staticdir.on': True,
+         'tools.staticdir.dir': IMG_DIR
+        }
 }
 
 cherrypy.tree.mount(PeedyPee(),'/', config=config)

@@ -1,10 +1,30 @@
+html {
+  height: 100%;
+}
+
 body {
-  padding: 50px;
+  /*padding: 50px;*/
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #333;
+  background: url(/images/diffraction-background-repeating.jpg) repeat-x #a2cfef;
+  height: 100%;
 }
 
 a {
-  color: blue;
+  color: #0088CC;
+  text-decoration: none;
+}
+
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+p.vertical {
+  vertical-align: middle;
 }
 
 .clearfix:after {
@@ -24,6 +44,11 @@ a {
 }
 
 h1 {
+  padding-left: 10px;
+}
+
+h2 {
+  padding-left: 10px;
 }
 
 td {
@@ -36,11 +61,10 @@ input[type='radio'], label {
 }
 
 .header {
-  background-color: lightSkyBlue;
-  height: 80px;
+  background: transparent url(/images/australian_synchrotron_logo.png) right top no-repeat;
+  height: 100px; 
   text-align: center;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  color: white;
 }
 
 .footer {
@@ -62,12 +86,18 @@ input[type='radio'], label {
   top:0;
   width: 200px;
   height: 600px;
-  background-color: LightCyan;
+  padding-left: 10px;
+  background-color: #C8C8C8;
 }
 
 .content {
   top: 0;
   margin-left:210px;
+  padding-left: 10px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-right: 10px;
+  background-color: white;
 }
 
 .login {
@@ -99,16 +129,20 @@ input[type='radio'], label {
 }
 
 .th_odd {
-  background-color: LimeGreen;
+  /*background-color: LimeGreen;*/
+  background-color: #a2cfef;
 }
 
 .th_even {
-  background-color: LightGreen;
+  /*background-color: LightGreen;*/
+  background-color: #4197e2;
 }
 
 .th_top {
-  background-color: Green;
-  border: 1px solid LightGreen;
+  /*background-color: Green;
+  border: 1px solid LightGreen;*/
+  background-color: #66C2E0;
+  /*background-color: #3366CC;*/
 }
 
 .right {
