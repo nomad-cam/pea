@@ -101,12 +101,12 @@ class PeedyPee(object):
         #if "password" in kws:
             passw = kws['password']
             
-        ldap_server = "10.7.0.243"    # ldap://
-        acct_sx = "@synchrotron.org.au"
-        base_dn = 'dc=synchrotron,dc=org,dc=au'
-        #ldap_server = values['LDAP']['ldap_server']
-        #acct_sx = values['LDAP']['acct_sx']
-        #base_dn = values['LDAP']['base_dn']
+        #ldap_server = "10.7.0.243"    # ldap://
+        #acct_sx = "@synchrotron.org.au"
+        #base_dn = 'dc=synchrotron,dc=org,dc=au'
+        ldap_server = values['LDAP']['ldap_server']
+        acct_sx = values['LDAP']['acct_sx']
+        base_dn = values['LDAP']['base_dn']
                 
         connect = ldap.open(ldap_server)
         
@@ -134,6 +134,8 @@ class PeedyPee(object):
             cookie['name']['max-age'] = 7200
             
             #t = jinja_env.get_template('index.html')
+            connect.unbind_s()
+            
             raise cherrypy.HTTPRedirect('/')
             #return t.render(user=user)
 
@@ -155,7 +157,17 @@ class PeedyPee(object):
         if self.loggedin():
             cookies = self.returnCookies()
             
+            # enable managers and admin to view other pdps
+            if user:
+                selectName = user
+            else:
+                selectName = userName
+            
+            query = ("SELECT * FROM `person` WHERE userName='%s'" % selectName)
+            select_dict = self.runQuery(query, all=0)
+            
             userName = cookies['user']
+                
             query = "SELECT * FROM `person` WHERE userName='%s'" % userName
             side_dict = self.runQuery(query)[0]
             
@@ -163,7 +175,8 @@ class PeedyPee(object):
             g_dict = self.runQuery(query)
             
             t = jinja_env.get_template('personal_pdp.html')
-            return t.render(sideDB=side_dict,groupDB=g_dict,user=cookies['user'],title=cookies['title'],name=cookies['fname'])
+            return t.render(sideDB=side_dict,groupDB=g_dict,selectDB=select_dict,
+                            user=userName,title=cookies['title'],name=cookies['fname'])
             
         else:
             raise cherrypy.HTTPRedirect('/login')
@@ -398,6 +411,7 @@ class PeedyPee(object):
                         lname = pselect['lastName']
                         gname = pselect['groupName']
                         manag = pselect['manager']
+                        ptitle = pselect['position']
                         admin = pselect['isAdmin']
                         gmana = pselect['managedGroups']
                         year  = pselect['year']
@@ -407,13 +421,14 @@ class PeedyPee(object):
                         return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
                                     title=title,name=cookies['fname'],people_dict=result_people,group_dict=result_group,
                                     uname=uname,fname=fname,lname=lname,gname=gname,manag=manag,
-                                    admin=admin,gmana=gmana,year=year,cycle=cycle,isman=isman)
+                                    admin=admin,gmana=gmana,year=year,ptitle=ptitle,
+                                    cycle=cycle,isman=isman)
                     except:
                         #user not in DB
                         return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
                                     title=title,name=cookies['fname'],people_dict=result_people,group_dict=result_group,
                                     uname="",fname="",lname="",gname="",manag="",
-                                    admin="",gmana="",year="",cycle="",isman="")
+                                    admin="",gmana="",year="",cycle="",isman="",ptitle="")
                         
                 
                 #Check for person pdp view
@@ -454,18 +469,20 @@ class PeedyPee(object):
             ldap_server = values['LDAP']['ldap_server']
             acct_sx = values['LDAP']['acct_sx']
             base_dn = values['LDAP']['base_dn']
-                
+            
             connect = ldap.open(ldap_server)
         
             try:
                 connect.simple_bind_s(user+acct_sx,passwd)
             
                 result = connect.search_s(base_dn,ldap.SCOPE_SUBTREE, 
-                        '(&(objectclass=User) (sAMAccountName=*))', 
+                        '(&(objectclass=User) (sAMAccountName="*"))', 
                         ['title','displayName','givenName'])
             
                 position = result[0][1]['title'][0]
                 name = result[0][1]['givenName'][0]
+            
+                connect.unbind_s()
             
                 raise cherrypy.HTTPRedirect('/admin')
             
@@ -521,7 +538,7 @@ class PeedyPee(object):
         #    return False
     
     @cherrypy.expose
-    #Chewck if gname is in the database already        
+    #Check if gname is in the database already        
     def isGroupDB(self,gname):
         #cur_check = db.cursor()
         query = "SELECT groupName FROM `group` WHERE groupName = '%s'" % gname
@@ -614,6 +631,7 @@ class PeedyPee(object):
             p_fname = kws['person_firstname']
             p_uname = kws['person_username']
             p_group = kws['person_group']
+            p_title = kws['person_title']
             
                 
             p_year = self.default_year()
@@ -632,13 +650,19 @@ class PeedyPee(object):
             #If user already in Database the update, else add a new user
             if self.isUserDB(p_uname):
 
-                    query = ("UPDATE person SET "
-                             "groupName='%s',userName='%s',firstName='%s',lastName='%s',manager='%s',isManager='%s' "
-                             "WHERE userName='%s'" % (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager,p_uname))
+                    query = ("UPDATE `person` SET "
+                             "groupName='%s',userName='%s',firstName='%s',"
+                             "lastName='%s',manager='%s',isManager='%s',position='%s' "
+                             "WHERE userName='%s'" 
+                             % (p_group,p_uname,p_fname,p_lname,
+                                p_manager,p_ismanager,p_title,p_uname))
             else:
-                    query = ("INSERT INTO person (groupName,userName,firstName,lastName,manager,isManager,year) VALUES "
-                             "('%s','%s','%s','%s','%s','%s','%s')" % 
-                             (p_group,p_uname,p_fname,p_lname,p_manager,p_ismanager,p_year))
+                    query = ("INSERT INTO `person` "
+                            "(groupName,userName,firstName,lastName,"
+                            "position,manager,isManager,year) VALUES "
+                            "('%s','%s','%s','%s','%s','%s','%s')" % 
+                            (p_group,p_uname,p_fname,p_lname,
+                            p_title,p_manager,p_ismanager,p_year))
 
             
             self.runQuery(query,read=0)

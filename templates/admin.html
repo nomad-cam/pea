@@ -79,9 +79,11 @@ $(document).ready(function() {
 <label>Username: <input id="person_username" type="text" name="person_username" value='{{ uname }}'></label><br>
 <label>First Name: <input id="person_firstname" type="text" name="person_firstname" value='{{ fname }}'></label><br>
 <label>Last Name: <input id="person_lastname" type="text" name="person_lastname" value='{{ lname }}'></label><br>
+<label>Title: <input id="person_title" type="text" name="person_title" value='{{ ptitle }}'></label><br>
 <label>Group: <input id="person_group" type="text" name="person_group" value='{{ gname }}'></label><br>
 <label>Manager: <input id="person_manager" type="text" name="person_manager" value='{{ manag }}'></label><br>
-<label>isManager: <input type="checkbox" name="person_ismanager" {% if isman %}checked{% endif %}></label><br><p>
+<label>isManager: <input type="checkbox" name="person_ismanager" {% if isman %}checked{% endif %}></label><br>
+<label>isAdmin: <input type="checkbox" name="person_isadmin" {% if isadmin %}checked{% endif %}></label><br><p>
 <button id="person_save" class="right">Save Person</button>
 
 </form>
