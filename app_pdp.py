@@ -249,6 +249,42 @@ class PeedyPee(object):
             raise cherrypy.HTTPRedirect('/login')
 
     @cherrypy.expose
+    def grouppdp_signoff(self,**kws):
+        if self.loggedin():
+            group_url = kws['group_url']
+            year = kws['s_year']
+            cycle = kws['s_cycle']
+            if 'manager-sign' in kws:
+                signoff = 1
+            else:
+                err = "The signoff box was not checked"
+                raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'%(group_url,year,err))
+            comments = kws['comments']
+            next_cycle = int(cycle) + 1
+            thisday = date.today().strftime("%Y/%m/%d")
+            query = ( "SELECT gid FROM `group` WHERE urlName='%s'" % group_url )
+            groupID = self.runQuery(query,all=0)
+            
+            # "Store" the current cycle group goals and copy to new cycle
+            query = ("INSERT INTO `group-pdp-data` "
+                    "(gid,cycle,year,goalTitle,description,owners,deadline,budget,training) "                                          
+                     "SELECT gid,'%s',year,goalTitle,description,owners,deadline,budget,training "
+                     "FROM `group-pdp-data` "
+                     "WHERE (gid='%s' AND cycle='%s')" % (next_cycle,groupID['gid'],cycle))
+            self.runQuery(query,read=0)
+            
+            #Save the sign off data...
+            query = ("INSERT INTO `group-pdp-signoff` "
+                     "(gid,year,cycle,date,manager_checked,comments) "
+                     "VALUES ('%s','%s','%s','%s','%s','%s') "
+                     % (groupID['gid'],year,cycle,thisday,signoff,comments))
+            self.runQuery(query,read=0)
+            
+            err="Signoff Complete. Progressed to Cycle: %s... %s" % (next_cycle,query)
+            raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'%(group_url,year,err))
+            
+
+    @cherrypy.expose
     def grouppdp_initialise(self,**kws):
         if self.loggedin():
                         
@@ -570,8 +606,7 @@ class PeedyPee(object):
     #Update the DB with the user information
     def admin_update_person(self, **kws):
         if self.loggedin():
-            #db_update = MySQLdb.connect(host='localhost',user='root',passwd='password',db='peedy-pee')
-        
+                    
             #Collect the information entered from the form
             p_manager = kws['person_manager']
             p_lname = kws['person_lastname']

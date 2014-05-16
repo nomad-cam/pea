@@ -55,8 +55,8 @@ Group goals, place a blurb here
 {% for goal in groupPDPs %}
     <tr>
         <input type='hidden' name='zid[]' value='{{ goal.zid }}'>
-        <td><input type='text' name='group_goal[]' size='30' value='{{ goal.goalTitle }}'></td>
-        <td><textarea name='group_description[]' rows='4' cols='40'>{{ goal.description }}</textarea></td>
+        <td><input type='text' name='group_goal[]' size='25' value='{{ goal.goalTitle }}'></td>
+        <td><textarea name='group_description[]' rows='4' cols='30'>{{ goal.description }}</textarea></td>
         <td><input type='text' name='group_owners[]' size='10' value='{{ goal.owners }}'></td>
         <td><input type='text' name='group_deadline[]' size='10' value='{{ goal.deadline }}'></td>
         <td><input type='number' name='group_budget[]' size='10' value='{{ goal.budget }}'></td>
@@ -74,7 +74,12 @@ Group goals, place a blurb here
 <br>
 <br>
 <h2> Sign-off</h2>
+<form action='/grouppdp_signoff' method='POST'>
+<input type='hidden' name="group_url" value='{{ group_url }}'>
+<input type='hidden' name="s_year" value='{{ year }}'>
+<input type='hidden' name="s_cycle" value='{{ cycle }}'>
 <label>Sign-off<input type=checkbox name="manager-sign"></label>
-<label>Comments<textarea rows='4' cols='20'></textarea></label><br><br>
+<label>Comments<textarea name="comments" rows='4' cols='20'></textarea></label><br><br>
 <input type='submit' value="Apply New Goals">
+</form>
 {% endblock %}
