@@ -217,6 +217,8 @@ class PeedyPee(object):
                     % (groupID['gid'],year))
             current_cycle = self.runQuery(query, all=0)
             
+            g_training = self.getTraining()
+            
             if 'add_group_row' in kws:
                 # First save data then add a new line
                 for j in range(len(kws['zid[]'])):
@@ -255,7 +257,7 @@ class PeedyPee(object):
             
            
             t = jinja_env.get_template('group_pdp.html')
-            return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
+            return t.render(sideDB=side_dict,groupDB=g_dict,err=err,training=g_training,
                             user=cookies['user'],title=cookies['title'],name=cookies['fname'],year=year,cycle=current_cycle['cycle'],
                             group_url=group,groupPDPs=gpdps,groupName=groupID['groupName'],manager=groupID['manager'])
             
@@ -343,6 +345,11 @@ class PeedyPee(object):
                 urlStr = ("/grouppdp/%s/%s" % (name,year))
                 
             raise cherrypy.HTTPRedirect(urlStr)
+
+    
+    def getTraining(self):
+        query = "SELECT tid,courseName FROM `training` WHERE available='1'"
+        return self.runQuery(query,all=1)
     
     
     @cherrypy.expose

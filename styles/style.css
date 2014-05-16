@@ -170,6 +170,14 @@ input[type='radio'], label {
   width: 600px;
 }
 
+#group_training {
+  width: 200px;
+}
+
+#group_training option {
+  width: 250px;
+}
+
 #people_list {
   width:200px;
   float:left;

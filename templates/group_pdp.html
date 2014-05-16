@@ -60,8 +60,14 @@ Group goals, place a blurb here
         <td><input type='text' name='group_owners[]' size='10' value='{{ goal.owners }}'></td>
         <td><input type='text' name='group_deadline[]' size='10' value='{{ goal.deadline }}'></td>
         <td><input type='number' name='group_budget[]' size='10' value='{{ goal.budget }}'></td>
-        <td><label><input type='radio' name='group_training[]' value='true' checked='...'>Yes</label>
-            <label><input type='radio' name='group_training[]' value='false' checked='...'>No</label>
+        {# <td><label><input type='radio' name='group_training[]' value='true' checked='...'>Yes</label>
+            <label><input type='radio' name='group_training[]' value='false' checked='...'>No</label> #}
+            
+        <td><select name="group_training[]" id="group_training">
+            {% for train in training %}
+            <option value='{{ train.tid }}'>{{ train.courseName }}</option>
+            {% endfor %}
+            </select>
             <input type='text' name='course_other'></td>
     </tr>
 {% endfor %}
