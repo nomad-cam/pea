@@ -642,6 +642,11 @@ class PeedyPee(object):
             else:
                 #p_ismanager = 'off'
                 p_ismanager = 0
+
+            if 'person_isadmin' in kws:
+                p_isadmin = 1
+            else:
+                p_isadmin = 0
             
             if p_uname == "":
                 raise cherrypy.HTTPRedirect('/admin?e=noUser')
@@ -651,17 +656,17 @@ class PeedyPee(object):
             if self.isUserDB(p_uname):
 
                     query = ("UPDATE `person` SET "
-                             "groupName='%s',userName='%s',firstName='%s',"
+                             "groupName='%s',userName='%s',firstName='%s',isAdmin='%s',"
                              "lastName='%s',manager='%s',isManager='%s',position='%s' "
                              "WHERE userName='%s'" 
-                             % (p_group,p_uname,p_fname,p_lname,
+                             % (p_group,p_uname,p_fname,p_isadmin,p_lname,
                                 p_manager,p_ismanager,p_title,p_uname))
             else:
                     query = ("INSERT INTO `person` "
-                            "(groupName,userName,firstName,lastName,"
+                            "(groupName,userName,firstName,lastName,isAdmin,"
                             "position,manager,isManager,year) VALUES "
-                            "('%s','%s','%s','%s','%s','%s','%s')" % 
-                            (p_group,p_uname,p_fname,p_lname,
+                            "('%s','%s','%s','%s','%s','%s','%s','%s')" % 
+                            (p_group,p_uname,p_fname,p_lname,p_isadmin,
                             p_title,p_manager,p_ismanager,p_year))
 
             

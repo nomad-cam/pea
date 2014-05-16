@@ -83,7 +83,7 @@ $(document).ready(function() {
 <label>Group: <input id="person_group" type="text" name="person_group" value='{{ gname }}'></label><br>
 <label>Manager: <input id="person_manager" type="text" name="person_manager" value='{{ manag }}'></label><br>
 <label>isManager: <input type="checkbox" name="person_ismanager" {% if isman %}checked{% endif %}></label><br>
-<label>isAdmin: <input type="checkbox" name="person_isadmin" {% if isadmin %}checked{% endif %}></label><br><p>
+<label>isAdmin: <input type="checkbox" name="person_isadmin" {% if admin %}checked{% endif %}></label><br><p>
 <button id="person_save" class="right">Save Person</button>
 
 </form>
