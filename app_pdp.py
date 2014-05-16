@@ -70,6 +70,7 @@ class PeedyPee(object):
             #uManager = result[0]['manager']
             #return side_dict
             
+            
             t = jinja_env.get_template('index.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
                             userName=userName,title=cookies['title'],firstName=cookies['fname'])
@@ -447,7 +448,7 @@ class PeedyPee(object):
             
             if (("username" in kws) and ("password" in kws)):
                 user = kws['username']
-                passw = kws['password']
+                passwd = kws['password']
             
             
             ldap_server = values['LDAP']['ldap_server']
@@ -457,7 +458,7 @@ class PeedyPee(object):
             connect = ldap.open(ldap_server)
         
             try:
-                connect.simple_bind_s(user+acct_sx,passw)
+                connect.simple_bind_s(user+acct_sx,passwd)
             
                 result = connect.search_s(base_dn,ldap.SCOPE_SUBTREE, 
                         '(&(objectclass=User) (sAMAccountName=*))', 

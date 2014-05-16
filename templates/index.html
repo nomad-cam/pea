@@ -12,7 +12,25 @@
 <hr>
 <h2> Personal PDP </h2>
 <ul>
-    <li><a href="personalpdp/{{ sideDB.userName }}">Edit Personal PDP: {{ sideDB.userName }} </a></li>
-    <br>
-    
+<li><a href="personalpdp/{{ sideDB.userName }}">Edit Personal PDP: {{ sideDB.userName }} </a></li>
+</ul>
+<br><br>
+
+
+{% if sideDB.isManager %}
+{% if groupDB %}
+<h2>Group PDP</h2>        
+<ul>
+{% for value in groupDB %}
+<li><a href='/grouppdp/{{ value.urlName }}'> {{ value.groupName }} </a></li>
+{% endfor %}
+</ul>   
+{% endif %}
+{% endif %}
+<br><br>
+<h2>Team Member PDP</h2>
+{% for person in personDB %}
+<li><a href='personalpdp/{{ person.userName }}'>{{ person.userName  }} </a></li>
+{% endfor %}
+
 {% endblock %}
