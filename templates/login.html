@@ -1,14 +1,14 @@
-{% extends "layout.html" %}
+{% extends "login_layout.html" %}
 
-{% block greeting %}
-Login
-{% endblock %}
-
-{% block content %}
-    <p class='error'>{{ err_msg }}</p>
-    <form action='/dologin' method='POST'>
+{% block login_content %}
+    <div class='error'>{{ err_msg }}</div>
+    <div class='middle'>
+    <div class='inner'>
+    <form action='/dologin' method='POST' >
         <label>Username: <input type='text' name='username'></label><br>
         <label>Password: <input type='password' name='password'></label><br>
         <input type='submit' value='Login'>
     </form>
+    </div>
+    </div>
 {% endblock %}

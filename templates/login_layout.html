@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html lang='en'>
+<head>
+
+    {% block head %}
+    <title>Peedy-Pee Login</title>  
+    {% endblock %}
+    <link rel="stylesheet" type="text/css" href="/styles/style.css" />
+    <script type='text/javascript' src='/js/jquery.min.js' ></script>
+</head>
+
+<body>
+    <div class='header'>
+        <p class='vertical'><h1><big><big>Peedy-Pee </big></big></h1></p>
+    </div>
+
+    <div class='login'>
+        {% block login_content %}
+
+        {% endblock %}
+    </div>
+
+</body>
+</html>

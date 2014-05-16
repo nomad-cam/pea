@@ -26,7 +26,7 @@
         <p><b>Manager: </b> {{ selectDB.manager }} </p>
         <hr>
         
-        {% else %}
+        {% elif sideDB %}
         
         <p><b>Name: </b> {{ sideDB.firstName }} </p>
         <p><b>Title: </b> {{ sideDB.position }} </p>
@@ -34,14 +34,17 @@
         <p><b>Manager: </b> {{ sideDB.manager }} </p>
         <hr>
         
+        {% else %}
+        
         {% endif %}
         
         <a href="/"> Home </a><br>
         <br>
-        
+        {% if sideDB %}
         <a href="/personalpdp/{{ sideDB.userName }}">Edit Your PDP</a><br>
         <br>
         <br>
+        
         {% if sideDB.isManager %}
         {% if groupDB %}
         
@@ -60,8 +63,8 @@
         <br>
         <br>
         <a href='/logout'>Logout</a><br>
-        {# {% endif %}
-        {% endif %} #}
+        {% endif %}
+        {# {% endif %} #}
         {% endblock %}
     </div>
     <div class='content'>
