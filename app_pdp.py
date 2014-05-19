@@ -360,12 +360,19 @@ class PeedyPee(object):
         if self.loggedin():
             cookies = self.returnCookies()
             
-            userName = cookies['user']
-            title = cookies['title']
-            query = "SELECT * FROM `person` WHERE userName='%s'" % userName
-            user_dict = self.runQuery(query)[0]
+            #userName = cookies['user']
             
-            query = "SELECT * FROM `group` WHERE manager='%s'" % userName
+            query = "SELECT uid FROM `person` WHERE userName='%s'" % cookies['user']
+            uid = self.runQuery(query,all=0)['uid']
+            
+            #return json.dumps(uid)
+            #title = cookies['title']
+            query = "SELECT * FROM `person` WHERE uid='%s'" % uid
+            user_dict = self.runQuery(query)[0]
+            title = user_dict['position']
+            userName = user_dict['userName']
+            
+            query = "SELECT * FROM `group` WHERE manager='%s'" % uid
             g_dict = self.runQuery(query)
             
             #check for the error flag and send to template            
