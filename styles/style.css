@@ -194,7 +194,7 @@ input[type='radio'], label {
 
 #person_div {
   height: 200px;
-  width: 600px;
+  width: 900px;
 }
 
 #group_div {
@@ -242,6 +242,11 @@ input[type='radio'], label {
   float: left;
 }
 
+#ldap_populate {
+  width: 300px;
+  float: left;
+}
+
 #group_select {
   width: 200px;
   float: left;
@@ -257,6 +262,10 @@ input[type='radio'], label {
 }
 
 #group_attributes>label {
+  float: right;
+}
+
+#ldap_populate>label {
   float: right;
 }
 

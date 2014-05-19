@@ -87,6 +87,13 @@ $(document).ready(function() {
 <button id="person_save" class="right">Save Person</button>
 
 </form>
+
+<form id='ldap_populate' action='/updateDBldap' method='POST'>
+<label>Username: <input id='username' name='username' type='text'></label><br>
+<label>Password: <input id='password' name='password' type='password'></label><br>
+<input type='submit' value='Update People from LDAP' class='right'>
+</form>
+
 </div>
 <br><br>
 <h2>Edit Group</h2>

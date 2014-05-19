@@ -475,7 +475,8 @@ class PeedyPee(object):
             
             ldap_server = values['LDAP']['ldap_server']
             acct_sx = values['LDAP']['acct_sx']
-            base_dn = values['LDAP']['base_dn']
+            base_dn = "OU=Staff,%s" % values['LDAP']['base_dn']
+                       
             
             connect = ldap.open(ldap_server)
         
@@ -483,21 +484,54 @@ class PeedyPee(object):
                 connect.simple_bind_s(user+acct_sx,passwd)
             
                 result = connect.search_s(base_dn,ldap.SCOPE_SUBTREE, 
-                        '(&(objectclass=User) (sAMAccountName="*"))', 
-                        ['title','displayName','givenName'])
+                        '(&(objectclass=User) (sAMAccountName=*))',
+                        ['title','givenName','sn','sAMAccountName'])
             
-                position = result[0][1]['title'][0]
-                name = result[0][1]['givenName'][0]
+                #position = result[0][1]['title'][0]
+                #name = result[0][1]['givenName'][0]
             
                 connect.unbind_s()
-            
-                raise cherrypy.HTTPRedirect('/admin')
+                #return json.dumps(result)
+                #raise cherrypy.HTTPRedirect('/admin?e=%s' % result)
             
             except ldap.LDAPError:
                 connect.unbind_s()
-                error = 'Unable to process Request. Please try again...'
+                error = 'Unable to process LDAP Request. Please try again...'
             
-                raise cherrypy.HTTPRedirect('/admin')
+                raise cherrypy.HTTPRedirect('/admin?e=%s' % error)
+        
+            for j in range(len(result)):
+                if 'title' in result[j][1]:
+                    title = result[j][1]['title'][0]
+                else:
+                    title = ''
+                
+                if 'givenName' in result[j][1]:    
+                    fname = result[j][1]['givenName'][0]
+                else:
+                    fname = ''
+                
+                if 'sn' in result[j][1]:
+                    lname = result[j][1]['sn'][0]
+                else:
+                    lname = ''
+                    
+                if 'sAMAccountName' in result[j][1]:
+                    uname = result[j][1]['sAMAccountName'][0]
+                else:
+                    uname = ''
+                    
+                query = ("INSERT IGNORE INTO `person` "
+                         "SET userName='%s',firstName='%s',lastName='%s',position='%s'"
+                         % (uname,fname,lname,title) )
+            
+                self.runQuery(query,read=0)
+            
+            #return json.dumps(result[0])
+            #return "%s, %s, %s, %s" % (title,fname,lname,uname)
+            error = '''Staff database updated from the Active Directory, manual editing may 
+                       be required'''
+            raise cherrypy.HTTPRedirect('/admin?e=%s' % error)
             
 
     @cherrypy.expose
