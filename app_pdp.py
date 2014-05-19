@@ -527,14 +527,18 @@ class PeedyPee(object):
 
                 try:            
                     self.runQuery(query,read=0)
-                    update += 1
                 except:
-                    pass
+                    continue
 
+                update += 1
+                
             error = '''Staff database updated from the Active Directory. %s new Staff added. 
                        Manual editing may be required''' % update
             raise cherrypy.HTTPRedirect('/admin?e=%s' % error)
-            
+
+    def prettynames(self, uname_list):
+        # Return a list of pretty names from a submitted username list
+        pass
 
     @cherrypy.expose
     def groups(self):
