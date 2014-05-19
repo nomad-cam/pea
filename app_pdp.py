@@ -375,11 +375,15 @@ class PeedyPee(object):
                 err = ""
 
             #Always display the group list and the user list
-            query = "SELECT userName,uid FROM `person`"
+            query = ( "SELECT userName,firstName,lastName,isManager,uid "
+                    "FROM `person` ORDER BY firstName" )
             result_people = self.runQuery(query,all=1)
 
             query = "SELECT groupName,gid FROM `group`"
             result_group = self.runQuery(query,all=1)
+
+            query = "SELECT firstName,lastName,uid FROM `person` WHERE isManager = '1'"
+            result_manager = self.runQuery(query,all=1)
             
             #Group edit has been initiated
             if 'group_click' in kws:
@@ -393,12 +397,14 @@ class PeedyPee(object):
                                         
                     return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
                             title=title,name=cookies['fname'],people_dict=result_people,
-                            group_dict=result_group,groupName=grp,groupEnabled=ebl,groupManager=man)
+                            manager_dict=result_manager,group_dict=result_group,
+                            groupName=grp,groupEnabled=ebl,groupManager=man)
                     
                 except:            
                     return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
                             title=title,name=cookies['fname'],people_dict=result_people,
-                            group_dict=result_group,groupName="",groupEnabled=0,groupManager="")
+                            manager_dict=result_manager,group_dict=result_group,
+                            groupName="",groupEnabled=0,groupManager="")
             
             #Person edit or pdp view has been initiated
             elif 'person_click' in kws:
@@ -426,14 +432,16 @@ class PeedyPee(object):
                         isman = pselect['isManager']
                                                                         
                         return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
-                                    title=title,name=cookies['fname'],people_dict=result_people,group_dict=result_group,
+                                    title=title,name=cookies['fname'],people_dict=result_people,
+                                    group_dict=result_group,manager_dict=result_manager,
                                     uname=uname,fname=fname,lname=lname,gname=gname,manag=manag,
                                     admin=admin,gmana=gmana,year=year,ptitle=ptitle,
                                     cycle=cycle,isman=isman)
                     except:
                         #user not in DB
                         return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
-                                    title=title,name=cookies['fname'],people_dict=result_people,group_dict=result_group,
+                                    title=title,name=cookies['fname'],people_dict=result_people,
+                                    group_dict=result_group,manager_dict=result_manager,
                                     uname="",fname="",lname="",gname="",manag="",
                                     admin="",gmana="",year="",cycle="",isman="",ptitle="")
                         
@@ -453,11 +461,12 @@ class PeedyPee(object):
                     raise cherrypy.HTTPRedirect(urlstr)
                         
                 return t.render(sideDB=user_dict,groupDB=g_dict,error="Reached the End...",title=title,name=cookies['fname'],
-                                people_dict=result_people,group_dict=result_group)
+                                people_dict=result_people,group_dict=result_group,manager_dict=result_manager)
                                 
                 #Just display the basic page if no other data is requested    
             else:
-                return t.render(sideDB=user_dict,groupDB=g_dict,error=err,title=title,name=cookies['fname'],
+                return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
+                                title=title,name=cookies['fname'],manager_dict=result_manager,
                                 people_dict=result_people,group_dict=result_group)
         else:
             #If not logged in the redirect to login page
@@ -637,6 +646,7 @@ class PeedyPee(object):
             else:
                 g_enable = 'off'
             
+            #create a url name, all lower case, space replaced by underscore
             g_url = g_name.lower().replace(" ","_")
             
             #read the the radio button and convert to int
@@ -673,14 +683,16 @@ class PeedyPee(object):
         if self.loggedin():
                     
             #Collect the information entered from the form
-            p_manager = kws['person_manager']
+            p_manager = kws['select_manager']
             p_lname = kws['person_lastname']
             p_fname = kws['person_firstname']
             p_uname = kws['person_username']
-            p_group = kws['person_group']
+            p_group = kws['select_group']
             p_title = kws['person_title']
             
-                
+            
+            #query = 
+            
             p_year = self.default_year()
             
             if 'person_ismanager' in kws:

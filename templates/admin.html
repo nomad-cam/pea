@@ -5,56 +5,6 @@
 {% endblock %}
 
 {% block content %}
-<script type='text/javascript'>
-$(document).ready(function() {
-    alert('pre-loading');
-    getpeople();
-    getgroups();
-    alert('Starting JS');
-    
-    $('#people_list').change(function() {
-        $('#person_attributes>input').val('');
-        $.ajax({
-            url: '/people/'+ $(this).val(),
-            success: function(data) {
-                $('#person_username').val(data.userName);
-                $('#person_firstname').val(data.firstName);
-                $('#person_lastname').val(data.lastName);
-                $('#person_group').val(data.groupName);
-                $('#person_manager').val(data.manager);
-                $('#person_ismanager').val(data.isManager);
-            }
-        });
-    });
-    
-    function getpeople(){
-        $.ajax({
-            url: '/people',
-            success: function(data){
-                data.foreach(function(person) {
-                    $('#people_list').append('<option value="'+person.uid+'" data-username='+person.userName+'>'+person.firstName+'</option>');
-                });
-            },
-            datatype: 'json'
-        });
-        alert('What People?');
-    }
-    
-    function getgroups(){
-        $.ajax({
-            url: '/groups',
-            success: function(data){
-                data.foreach(function(group){
-                    $('#group_list').append('<option value="'+group._id+'" > ' + group.name + '</option>');
-                });
-            },
-            dataType: 'json'
-        });
-    }
-    
-    
-</script>
-
 
 <h1>Peedy-Pee Admin Page</h1>
 <br>
@@ -65,23 +15,41 @@ $(document).ready(function() {
 <div id='person_div' class='clearfix'>
 
 <form id="person_select" action="/admin" method='POST'>
-<select id=people_list name='people_list' size='10'>
-{% for value in people_dict %}
-<option value='{{ value.uid }}'>{{ value.userName }}</option>
-{% endfor %}
+<select id='people_list' name='people_list' size='10'>
+{% for value in people_dict -%}
+<option value='{{ value.uid }}'>{{ value.firstName }} {{ value.lastName }}</option>
+{% endfor -%}
 </select><br>
 <button id="edit_person" type="submit" name="edit_person">Edit Person</button>
 <button id="view_person" type='submit' name='view_person' >View PDP</button>
 <input type='hidden' name='person_click' value=''>
 </form>
 
-<form id="person_attributes" action='/admin_update_person' method="POST">
+<form name='person_attributes' id="person_attributes" action='/admin_update_person' method="POST">
 <label>Username: <input id="person_username" type="text" name="person_username" value='{{ uname }}'></label><br>
 <label>First Name: <input id="person_firstname" type="text" name="person_firstname" value='{{ fname }}'></label><br>
 <label>Last Name: <input id="person_lastname" type="text" name="person_lastname" value='{{ lname }}'></label><br>
 <label>Title: <input id="person_title" type="text" name="person_title" value='{{ ptitle }}'></label><br>
-<label>Group: <input id="person_group" type="text" name="person_group" value='{{ gname }}'></label><br>
-<label>Manager: <input id="person_manager" type="text" name="person_manager" value='{{ manag }}'></label><br>
+<label>Group: 
+{# <input id="person_group" type="text" name="person_group" value='{{ gname }}'> #}
+<select id='select_group' name='select_group'>
+{% for value in group_dict -%}
+<option value='{{ value.gid }}' {% if value.gid == gname %}
+selected
+{% endif %}>{{ value.groupName }}</option>
+{% endfor -%}
+</select></label><br>
+<label>Manager: 
+{# <input id="person_manager" type="text" name="person_manager" value='{{ manag }}'> #}
+<select id='select_manager' name='select_manager'>
+<option value='0' default>None</option>
+{% for value in manager_dict -%}
+<option value='{{ value.uid }}' {% if value.uid == manag %}
+selected 
+{% endif %}>{{ value.firstName }} {{ value.lastName }}</option>
+{% endfor -%}
+</select>
+</label><br>
 <label>isManager: <input type="checkbox" name="person_ismanager" {% if isman %}checked{% endif %}></label><br>
 <label>isAdmin: <input type="checkbox" name="person_isadmin" {% if admin %}checked{% endif %}></label><br><p>
 <button id="person_save" class="right">Save Person</button>
@@ -101,16 +69,26 @@ $(document).ready(function() {
 <div id="group_div" class='clearfix'>
 <form id="group_select" action='/admin' method="POST">
 <select id="group_list" name='group_list' size="10">
-{% for value in group_dict %}
+{% for value in group_dict -%}
 <option value='{{ value.gid }} '>{{ value.groupName }}</option>
-{% endfor %}
+{% endfor -%}
 </select><br>
 <button id="edit_group" type='submit' name='edit_group'>Edit Group</button>
 <input type='hidden' name='group_click' value=''>
 </form>
 <form id='group_attributes' action='/admin_update_group' method='POST'>
 <label>Group Name: <input id="group_name" type="text" name="group_name" value='{{ groupName }}'></label><br>
-<label>Group Manager: <input id="group_manager" type="text" name="group_manager" value='{{ groupManager }}'></label><br>
+<label>Group Manager: {# <input id="group_manager" type="text" name="group_manager" 
+value='{{ groupManager }}'> #}
+<select id='select_manager' name='group_manager'>
+<option value='0' default>None</option>
+{% for value in manager_dict -%}
+<option value='{{ value.uid }}' {% if value.uid == groupManager %}
+selected
+{% endif %}>{{ value.firstName }} {{ value.lastName }}</option>
+{% endfor -%}
+</select>
+</label><br>
 <label>Enabled: <input type='checkbox' name='group_enabled' {% if groupEnabled %}checked{% endif %} ></label><br><p>
 <button id='save_group' class='right'>Save Group</button>
 </form>

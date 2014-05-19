@@ -242,6 +242,14 @@ input[type='radio'], label {
   float: left;
 }
 
+#select_group {
+  width: 185px;
+}
+
+#select_manager {
+  width: 185px;
+}
+
 #ldap_populate {
   width: 300px;
   float: left;
