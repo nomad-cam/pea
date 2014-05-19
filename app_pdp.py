@@ -56,16 +56,23 @@ class PeedyPee(object):
     def index(self,**kws):
         if self.loggedin():
             cookies = self.returnCookies()
-            userName = cookies['user']
+            #userName = cookies['user']
             
+            query = "SELECT uid FROM `person` WHERE userName='%s'" % cookies['user']
+            uid = self.runQuery(query, all=0)['uid']
+                        
             err = ''
             if 'e' in kws:
                 err = kws['e']
             
-            query = "SELECT * FROM `person` WHERE userName='%s'" % userName
+            query = "SELECT * FROM `person` WHERE uid='%s'" % uid
             side_dict = self.runQuery(query)[0]
+            userName = side_dict['userName']
+            title = side_dict['position']
+            name = "%s %s" % ( side_dict['firstName'], side_dict['lastName'])
             
-            query = "SELECT * FROM `group` WHERE manager='%s'" % userName
+            
+            query = "SELECT * FROM `group` WHERE manager='%s'" % uid
             g_dict = self.runQuery(query)
             #uManager = result[0]['manager']
             #return side_dict
@@ -73,7 +80,7 @@ class PeedyPee(object):
             
             t = jinja_env.get_template('index.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
-                            userName=userName,title=cookies['title'],firstName=cookies['fname'])
+                            userName=userName,title=title,firstName=name)
         else:
             raise cherrypy.HTTPRedirect("/login")
             #t = jinja_env.get_template('login.html')
@@ -157,6 +164,11 @@ class PeedyPee(object):
         if self.loggedin():
             cookies = self.returnCookies()
             
+            query = "SELECT uid,userName FROM `person` WHERE userName='%s'" % cookies['user']
+            result = self.runQuery(query,all=0)
+            uid = result['uid']
+            userName = result['userName']
+            
             # enable managers and admin to view other pdps
             if user:
                 selectName = user
@@ -166,12 +178,12 @@ class PeedyPee(object):
             query = ("SELECT * FROM `person` WHERE userName='%s'" % selectName)
             select_dict = self.runQuery(query, all=0)
             
-            userName = cookies['user']
+            #userName = cookies['user']
                 
-            query = "SELECT * FROM `person` WHERE userName='%s'" % userName
+            query = "SELECT * FROM `person` WHERE uid='%s'" % uid
             side_dict = self.runQuery(query)[0]
             
-            query = "SELECT * FROM `group` WHERE manager='%s'" % userName
+            query = "SELECT * FROM `group` WHERE manager='%s'" % uid
             g_dict = self.runQuery(query)
             
             t = jinja_env.get_template('personal_pdp.html')
@@ -202,11 +214,14 @@ class PeedyPee(object):
             if year == None:
                 year = self.default_year()
             
-            userName = cookies['user']
-            query = "SELECT * FROM `person` WHERE userName='%s'" % userName
+            #userName = cookies['user']
+            query = "SELECT uid FROM `person` WHERE userName='%s'" % cookies['user']
+            uid = self.runQuery(query,all=0)['uid']
+            
+            query = "SELECT * FROM `person` WHERE uid='%s'" % uid
             side_dict = self.runQuery(query)[0]
             
-            query = "SELECT * FROM `group` WHERE manager='%s'" % userName
+            query = "SELECT * FROM `group` WHERE manager='%s'" % uid
             g_dict = self.runQuery(query)
             
                        
