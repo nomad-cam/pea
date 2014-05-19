@@ -487,18 +487,15 @@ class PeedyPee(object):
                         '(&(objectclass=User) (sAMAccountName=*))',
                         ['title','givenName','sn','sAMAccountName'])
             
-                #position = result[0][1]['title'][0]
-                #name = result[0][1]['givenName'][0]
-            
                 connect.unbind_s()
-                #return json.dumps(result)
-                #raise cherrypy.HTTPRedirect('/admin?e=%s' % result)
             
             except ldap.LDAPError:
                 connect.unbind_s()
                 error = 'Unable to process LDAP Request. Please try again...'
             
                 raise cherrypy.HTTPRedirect('/admin?e=%s' % error)
+        
+            update = 0
         
             for j in range(len(result)):
                 if 'title' in result[j][1]:
@@ -520,17 +517,22 @@ class PeedyPee(object):
                     uname = result[j][1]['sAMAccountName'][0]
                 else:
                     uname = ''
-                    
-                query = ("INSERT IGNORE INTO `person` "
+                
+                if '_' in uname:
+                    continue
+                
+                query = ("INSERT INTO `person` "
                          "SET userName='%s',firstName='%s',lastName='%s',position='%s'"
                          % (uname,fname,lname,title) )
-            
-                self.runQuery(query,read=0)
-            
-            #return json.dumps(result[0])
-            #return "%s, %s, %s, %s" % (title,fname,lname,uname)
-            error = '''Staff database updated from the Active Directory, manual editing may 
-                       be required'''
+
+                try:            
+                    self.runQuery(query,read=0)
+                    update += 1
+                except:
+                    pass
+
+            error = '''Staff database updated from the Active Directory. %s new Staff added. 
+                       Manual editing may be required''' % update
             raise cherrypy.HTTPRedirect('/admin?e=%s' % error)
             
 
