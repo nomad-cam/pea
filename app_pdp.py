@@ -245,14 +245,22 @@ class PeedyPee(object):
             query = ("SELECT gid, groupName, manager FROM `group` WHERE urlName='%s'") % group
             groupID = self.runQuery(query, all=0)
             
-            query = ("SELECT MAX(cycle) AS cycle FROM `group-pdp-data` WHERE (gid='%s' AND year='%s')"
-                    % (groupID['gid'],year))
+            query = ("SELECT MAX(cycle) AS cycle FROM `group-pdp-data` "
+                     "WHERE (gid='%s' AND year='%s')"
+                      % (groupID['gid'],year))
             current_cycle = self.runQuery(query, all=0)
             
             g_training = self.getTraining()
+            g_members = self.getGroupMembers(groupID['gid'])                       
             
             if 'add_group_row' in kws:
-                # First save data then add a new line
+                # Reference the group_member list
+                names = []
+                for j in range(len(kws['zid[]'])):
+                    tmpStr = "group_owners[%s]" % kws['zid[]'][j]
+                    names.append( map(int,kws[tmpStr] ))
+                
+                # First save data then add a new line                                
                 for j in range(len(kws['zid[]'])):
                     query = ("UPDATE `group-pdp-data` "
                          "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', budget='%s', training='%s' "
@@ -271,15 +279,26 @@ class PeedyPee(object):
                 raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'% (group,year,err))
             
             elif 'save_group_data' in kws:
+                # Reference the group_member list
+                names = []
+                for j in range(len(kws['zid[]'])):
+                    tmpStr = "group_owners[%s]" % kws['zid[]'][j]
+                    names.append( map(int,kws[tmpStr] ))
+                    
+                # Convert list of strings to list of ints
+                #names = map(int, names)
+                
                 # Save the current data
                 for j in range(len(kws['zid[]'])):
                      query = ("UPDATE `group-pdp-data` "
                          "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', budget='%s', training='%s' "
                          "WHERE zid='%s'" 
-                         % (kws['group_goal[]'][j],kws['group_owners[]'][j],kws['group_description[]'][j],
-                         kws['group_deadline[]'][j],kws['group_budget[]'][j],kws['group_training[]'][j],kws['zid[]'][j]))
+                         % (kws['group_goal[]'][j],json.dumps(names[j]),
+                         kws['group_description[]'][j],kws['group_deadline[]'][j],
+                         kws['group_budget[]'][j],kws['group_training[]'][j],kws['zid[]'][j]))
                          
                      self.runQuery(query,read=0)
+                     #err = names
                 
                 raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'% (group,year,err))                   
             
@@ -290,8 +309,10 @@ class PeedyPee(object):
            
             t = jinja_env.get_template('group_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,err=err,training=g_training,
-                            user=cookies['user'],title=cookies['title'],name=cookies['fname'],year=year,cycle=current_cycle['cycle'],
-                            group_url=group,groupPDPs=gpdps,groupName=groupID['groupName'],manager=groupID['manager'])
+                            user=cookies['user'],title=cookies['title'],name=cookies['fname'],
+                            year=year,cycle=current_cycle['cycle'],group_url=group,
+                            groupPDPs=gpdps,groupName=groupID['groupName'],
+                            manager=groupID['manager'],gMembers=g_members)
             
         else:
             raise cherrypy.HTTPRedirect('/login')
@@ -394,7 +415,11 @@ class PeedyPee(object):
     def getOptions(self,opt):
         query = "SELECT `oid`,`option` FROM `options` WHERE inUse='%s'" % opt
         return self.runQuery(query,all=1)
-        #return query
+    
+    def getGroupMembers(self,gid):
+        query = ("SELECT uid,firstName,lastName,userName FROM `person` "
+                 "WHERE groupName='%s'" % gid)
+        return self.runQuery(query,all=1)
     
     @cherrypy.expose
     def admin(self, **kws):

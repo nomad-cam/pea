@@ -52,25 +52,36 @@ Group goals, place a blurb here
         <th class="th_even"> Training? </th>
     </tr>
     
-{% for goal in groupPDPs %}
+{% for goal in groupPDPs -%}
     <tr>
         <input type='hidden' name='zid[]' value='{{ goal.zid }}'>
         <td><input type='text' name='group_goal[]' size='25' value='{{ goal.goalTitle }}'></td>
         <td><textarea name='group_description[]' rows='4' cols='30'>{{ goal.description }}</textarea></td>
-        <td><input type='text' name='group_owners[]' size='10' value='{{ goal.owners }}'></td>
+        <td>
+        {# <input type='text' name='group_owners[]' size='10' value='{{ goal.owners }}'> #}
+        <select multiple name='group_owners[{{ goal.zid }}]'>
+        <option value='0'>None</option>
+        {% for member in gMembers -%}
+        <option value='{{ member.uid }}' 
+        {%- for num in goal.owners -%}
+        {% if member.uid == num %} selected {%- endif -%}{%- endfor -%}>
+        {{- member.userName }}</option>{{ goal.owners }} {{ member.uid }}
+        {% endfor -%}
+        </select>
+        </td>
         <td><input type='text' name='group_deadline[]' size='10' value='{{ goal.deadline }}'></td>
         <td><input type='number' name='group_budget[]' size='10' value='{{ goal.budget }}'></td>
         {# <td><label><input type='radio' name='group_training[]' value='true' checked='...'>Yes</label>
             <label><input type='radio' name='group_training[]' value='false' checked='...'>No</label> #}
             
         <td><select name="group_training[]" id="group_training">
-            {% for train in training %}
+            {% for train in training -%}
             <option value='{{ train.tid }}'>{{ train.courseName }}</option>
-            {% endfor %}
+            {% endfor -%}
             </select>
             <input type='text' name='course_other'></td>
     </tr>
-{% endfor %}
+{% endfor -%}
     
 </table>
 <br><br>
