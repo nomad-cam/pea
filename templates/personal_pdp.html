@@ -7,24 +7,34 @@
 
 {% block content %}
 
+<div class='error'>
+{{ error }}
+</div>
+
 {# <h1>Personal PDP for {{ sideDB.firstName }}</h1>
 <h2>{{ position }}</h2>
 <hr> #}
 <h2>Group Goals for {{ groupDB.groupName }}</h2>
 <table class="grouptable">
     <tr>
-        <th class="th_odd"> Responsibility </th>
-        <th class="th_even"> Area </th>
-        <th class="th_odd"> Description </th>
-        <th class="th_even"> Timing </th>
+        <th class="th_odd"> Group Goal </th>
+        <th class="th_even"> Description </th>
+        <th class="th_odd"> Owners </th>
+        <th class="th_even"> Deadline </th>
         <th class="th_odd"> Budget </th>
         <th class="th_even"> Training? </th>
     </tr>
-    <tr>
-        
-        
     
+    {% for goal in gpdps %}
+    <tr>
+        <td>{{ goal.goalTitle }}</td>
+        <td>{{ goal.description }}</td>
+        <td>{{ goal.owners }}</td>
+        <td>{{ goal.deadline }}</td>
+        <td>{{ goal.budget }}</td>
+        <td>{{ goal.training }}</td>
     </tr>
+    {% endfor %}
 </table>
 <br>
 <br>
@@ -39,17 +49,28 @@
         <th class="th_odd">Budget</th>
         <th class="th_even">Training?</th>
     </tr>
+    
+    {% if goalsAvailable %}
+    
+    {% else %}
+    {% for j in [1, 2, 3, 4] %}
     <tr>
-        <td><textarea name='goals' rows='4' cols='40'>pdp goal</textarea></td>
-        <td><label><input type='radio' name='aligns' value='true' checked='...'>Yes</label><br>
-            <label><input type='radio' name='aligns' value='false' checked='...'>No</label></td>
-        <td><textarea name='reason' rows='4' cols='20'>pdp reason</textarea></td>
-        <td><input type='text' name='deadline' size='10' value=''></td>
-        <td><input type='number' name='budget' size='10' value=''></td>
-        <td><label><input type='radio' name='training' value='true' checked='...'>Yes</label>
-            <label><input type='radio' name='training' value='false' checked='...'>No</label>
-            <input type='text' name='course_other'></td>
+        <td><textarea name='person_goals[]' rows='4' cols='30'></textarea></td>
+        <td><label><input type='radio' name='person_aligns[]' value='true' >Yes</label><br>
+            <label><input type='radio' name='person_aligns[]' value='false' >No</label></td>
+        <td><textarea name='person_reason[]' rows='4' cols='30'></textarea></td>
+        <td><input type='text' name='person_deadline[]' size='10' value=''></td>
+        <td><input type='number' name='person_budget[]' size='10' value=''></td>
+        <td><select name="person_training[]" id="person_training">
+            {% for train in training %}
+            <option value='{{ train.tid }}'>{{ train.courseName }}</option>
+            {% endfor %}
+            </select>
+            <input type='text' name='course_other[]'></td>
     </tr>
+    {% endfor %}
+    {% endif %}
+    
 </table>
 <br>
 <br>

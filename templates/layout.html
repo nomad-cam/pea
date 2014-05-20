@@ -20,7 +20,7 @@
         #}
         {% if selectDB %}
         
-        <p><b>Name: </b> {{ selectDB.firstName }} </p>
+        <p><b>Name: </b> {{ selectDB.firstName }} {{ selectDB.lastName }} </p>
         <p><b>Title: </b> {{ selectDB.position }} </p>
         <p><b>Group: </b> {{ selectDB.groupName }} </p>
         <p><b>Manager: </b> {{ selectDB.manager }} </p>
@@ -28,7 +28,7 @@
         
         {% elif sideDB %}
         
-        <p><b>Name: </b> {{ sideDB.firstName }} </p>
+        <p><b>Name: </b> {{ sideDB.firstName }} {{ sideDB.lastName }} </p>
         <p><b>Title: </b> {{ sideDB.position }} </p>
         <p><b>Group: </b> {{ sideDB.groupName }} </p>
         <p><b>Manager: </b> {{ sideDB.manager }} </p>

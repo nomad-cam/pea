@@ -160,7 +160,7 @@ class PeedyPee(object):
 
 
     @cherrypy.expose
-    def personalpdp(self,user=None):
+    def personalpdp(self,user=None,**kws):
         if self.loggedin():
             cookies = self.returnCookies()
             
@@ -168,6 +168,10 @@ class PeedyPee(object):
             result = self.runQuery(query,all=0)
             uid = result['uid']
             userName = result['userName']
+            
+            error = ''
+            if 'e' in kws:
+                error = kws['e']
             
             # enable managers and admin to view other pdps
             if user:
@@ -186,8 +190,16 @@ class PeedyPee(object):
             query = "SELECT * FROM `group` WHERE manager='%s'" % uid
             g_dict = self.runQuery(query)
             
+            query = "SELECT * FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
+            gpdps = self.runQuery(query,all=1)
+
+            p_training = self.getTraining()
+
+            error = query
+            
             t = jinja_env.get_template('personal_pdp.html')
-            return t.render(sideDB=side_dict,groupDB=g_dict,selectDB=select_dict,
+            return t.render(sideDB=side_dict,groupDB=g_dict,selectDB=select_dict,error=error,
+                            gpdps=gpdps,training=p_training,
                             user=userName,title=cookies['title'],name=cookies['fname'])
             
         else:
@@ -590,6 +602,17 @@ class PeedyPee(object):
             p_query = "SELECT * FROM `person`"
             result = self.runQuery(p_query)   
             return json.dumps(result)
+
+    #Check if the user is a manager
+    def isManager(self,userID):
+        query = "SELECT userName FROM `person` WHERE uid='%s'" % userID
+        result = self.runQuery(query,all=0)
+        
+        if result:
+            return result
+        else:
+            return False
+        
     
     @cherrypy.expose
     #Check if the user 'uname' is already in the database
