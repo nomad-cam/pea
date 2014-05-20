@@ -194,12 +194,17 @@ class PeedyPee(object):
             gpdps = self.runQuery(query,all=1)
 
             p_training = self.getTraining()
+            p_values = self.getValues()
+            p_compliance = self.getCompliance()
+            p_opt_val = self.getOptions(2)
+            p_opt_comp = self.getOptions(1)
 
-            error = query
+            #error = p_opt_val
             
             t = jinja_env.get_template('personal_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,selectDB=select_dict,error=error,
-                            gpdps=gpdps,training=p_training,
+                            gpdps=gpdps,training=p_training,values=p_values,
+                            compliance=p_compliance,val_opts=p_opt_val,comp_opts=p_opt_comp,
                             user=userName,title=cookies['title'],name=cookies['fname'])
             
         else:
@@ -378,6 +383,18 @@ class PeedyPee(object):
         query = "SELECT tid,courseName FROM `training` WHERE available='1'"
         return self.runQuery(query,all=1)
     
+    def getValues(self):
+        query = "SELECT vid,value FROM `values` WHERE disabled IS NULL"
+        return self.runQuery(query,all=1)
+        
+    def getCompliance(self):
+        query = "SELECT cid,area FROM `compliance` WHERE disabled IS NULL"
+        return self.runQuery(query,all=1)
+
+    def getOptions(self,opt):
+        query = "SELECT `oid`,`option` FROM `options` WHERE inUse='%s'" % opt
+        return self.runQuery(query,all=1)
+        #return query
     
     @cherrypy.expose
     def admin(self, **kws):

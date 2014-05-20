@@ -14,7 +14,7 @@
 {# <h1>Personal PDP for {{ sideDB.firstName }}</h1>
 <h2>{{ position }}</h2>
 <hr> #}
-<h2>Group Goals for {{ groupDB.groupName }}</h2>
+<h2>Group Goals for {{ selectDB.groupName }}</h2>
 <table class="grouptable">
     <tr>
         <th class="th_odd"> Group Goal </th>
@@ -25,7 +25,7 @@
         <th class="th_even"> Training? </th>
     </tr>
     
-    {% for goal in gpdps %}
+    {% for goal in gpdps -%}
     <tr>
         <td>{{ goal.goalTitle }}</td>
         <td>{{ goal.description }}</td>
@@ -34,7 +34,7 @@
         <td>{{ goal.budget }}</td>
         <td>{{ goal.training }}</td>
     </tr>
-    {% endfor %}
+    {% endfor -%}
 </table>
 <br>
 <br>
@@ -53,7 +53,7 @@
     {% if goalsAvailable %}
     
     {% else %}
-    {% for j in [1, 2, 3, 4] %}
+    {% for j in [1, 2, 3, 4] -%}
     <tr>
         <td><textarea name='person_goals[]' rows='4' cols='30'></textarea></td>
         <td><label><input type='radio' name='person_aligns[]' value='true' >Yes</label><br>
@@ -62,13 +62,13 @@
         <td><input type='text' name='person_deadline[]' size='10' value=''></td>
         <td><input type='number' name='person_budget[]' size='10' value=''></td>
         <td><select name="person_training[]" id="person_training">
-            {% for train in training %}
+            {% for train in training -%}
             <option value='{{ train.tid }}'>{{ train.courseName }}</option>
-            {% endfor %}
+            {% endfor -%}
             </select>
             <input type='text' name='course_other[]'></td>
     </tr>
-    {% endfor %}
+    {% endfor -%}
     {% endif %}
     
 </table>
@@ -89,6 +89,17 @@
         <th class='th_odd'>Grade</th>
         <th class='th_even'>Comment</th>
     </tr>
+    {% for value in values %}
+    <tr>
+        <td>{{ value.value }}</td>
+        <td><select>
+        {% for opt in val_opts -%}
+        <option value='{{ opt.vid }}'>{{ opt.option }}</option>
+        {% endfor -%}
+        </select</td>
+        <td><textarea cols='60' rows='2'></textarea>
+    </tr>
+    {% endfor %}
 </table>
 <br>
 <input type='submit' value='Save Values Data'>
@@ -104,6 +115,17 @@
         <th class='th_even'>Grade</th>
         <th class='th_odd'>Comment</th>
     </tr>
+    {% for comply in compliance %}
+    <tr>
+        <td>{{ comply.area }}</td>
+        <td><select>
+        {% for opt in comp_opts -%}
+        <option value='{{ opt.oid }}'>{{ opt.option }}</option>
+        {% endfor -%}
+        </select></td>
+        <td><textarea cols='30' rows='2'></textarea>
+    </tr>
+    {% endfor %}
 </table>
 <br>
 <input type='submit' value='Save Compliance Data'>
