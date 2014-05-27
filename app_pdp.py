@@ -79,9 +79,7 @@ class PeedyPee(object):
             
             query = "SELECT userName,firstName,lastName FROM `person` WHERE manager='%s'" % uid
             group_list = self.runQuery(query,all=1)
-            
-            err = query
-            
+                        
             t = jinja_env.get_template('index.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,error=err,
                             userName=userName,title=title,firstName=name,
@@ -478,8 +476,7 @@ class PeedyPee(object):
 
                     query = "SELECT userName,firstName,lastName FROM `person` WHERE groupName='%s'" % group_select
                     group_list = self.runQuery(query,all=1)
-                    err = query
-                                        
+                                                
                     return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
                             title=title,name=cookies['fname'],people_dict=result_people,
                             manager_dict=result_manager,group_dict=result_group,
