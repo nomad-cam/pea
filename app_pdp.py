@@ -98,9 +98,14 @@ class PeedyPee(object):
         raise cherrypy.HTTPRedirect("/")
     
     @cherrypy.expose
-    def login(self):
+    def login(self, **kws):
         t = jinja_env.get_template('login.html')
-        return t.render()
+        
+        err = ''
+        if 'e' in kws:
+            err = kws['e']
+        
+        return t.render(error=err)
     
     @cherrypy.expose
     def dologin(self, **kws):
@@ -151,10 +156,10 @@ class PeedyPee(object):
 
         except ldap.LDAPError:
             connect.unbind_s()
-            #t = jinja_env.get_template('login.html')
+            
             error = 'Incorrect Login Details. Please try again...'
-            #return t.render(err_msg = error)
-            raise cherrypy.HTTPRedirect('/login')
+            urlStr = '/login?e=%s' % error
+            raise cherrypy.HTTPRedirect(urlStr)
 
     @cherrypy.expose
     def changelog(self):
