@@ -77,10 +77,15 @@ class PeedyPee(object):
             #uManager = result[0]['manager']
             #return side_dict
             
+            query = "SELECT userName,firstName,lastName FROM `person` WHERE manager='%s'" % uid
+            group_list = self.runQuery(query,all=1)
+            
+            err = query
             
             t = jinja_env.get_template('index.html')
-            return t.render(sideDB=side_dict,groupDB=g_dict,err=err,
-                            userName=userName,title=title,firstName=name)
+            return t.render(sideDB=side_dict,groupDB=g_dict,error=err,
+                            userName=userName,title=title,firstName=name,
+                            groupList=group_list)
         else:
             raise cherrypy.HTTPRedirect("/login")
             #t = jinja_env.get_template('login.html')
@@ -470,17 +475,23 @@ class PeedyPee(object):
                     grp = result_g_select['groupName']
                     ebl = result_g_select['enabled']
                     man = result_g_select['manager']
+
+                    query = "SELECT userName,firstName,lastName FROM `person` WHERE groupName='%s'" % group_select
+                    group_list = self.runQuery(query,all=1)
+                    err = query
                                         
                     return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
                             title=title,name=cookies['fname'],people_dict=result_people,
                             manager_dict=result_manager,group_dict=result_group,
-                            groupName=grp,groupEnabled=ebl,groupManager=man)
+                            groupName=grp,groupEnabled=ebl,groupManager=man,
+                            groupList=group_list)
                     
                 except:            
                     return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
                             title=title,name=cookies['fname'],people_dict=result_people,
                             manager_dict=result_manager,group_dict=result_group,
-                            groupName="",groupEnabled=0,groupManager="")
+                            groupName="",groupEnabled=0,groupManager="",
+                            groupList="")
             
             #Person edit or pdp view has been initiated
             elif 'person_click' in kws:

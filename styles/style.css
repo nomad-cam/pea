@@ -199,7 +199,7 @@ input[type='radio'], label {
 
 #group_div {
   height: 200px;
-  width: 600px;
+  width: 900px;
 }
 
 #group_training {
@@ -230,6 +230,14 @@ input[type='radio'], label {
 #group_list {
   width: 200px;
   float: left;
+}
+
+#group_ul {
+  width: 300px;
+  float: left;
+  columns: 2;
+  -webkit-columns: 2;
+  -moz-columns: 2;
 }
 
 #edit_group {
@@ -267,6 +275,7 @@ input[type='radio'], label {
 #group_attributes {
   width: 300px;
   float: left;
+  height: 200px;
 }
 
 #person_attributes>label {

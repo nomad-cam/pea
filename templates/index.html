@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class='error'>
-{{ err }}
+{{ error }}
 </div>
 <h1> PDP - Home</h1>
 <hr>
@@ -26,11 +26,13 @@
 {% endfor %}
 </ul>   
 {% endif %}
-{% endif %}
+{# {% endif %} #}
 <br><br>
-<h2>Team Member PDP</h2>
-{% for person in personDB %}
-<li><a href='personalpdp/{{ person.userName }}'>{{ person.userName  }} </a></li>
+<h2>Team Member PDPs</h2>
+<ul>
+{% for list in groupList %}
+<li><a href='personalpdp/{{ list.userName }}'>{{ list.firstName }} {{ list.lastName }} </a></li>
 {% endfor %}
-
+</ul>
+{% endif %}
 {% endblock %}
