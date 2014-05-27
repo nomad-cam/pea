@@ -11,6 +11,19 @@
 {{ error }}
 </div>
 
+<h2>Personal PDP Admin</h2>
+<form action='/personalpdp_initialise' method='POST'>
+<fieldset class='new-goals'>
+<legend><b>Initialise New Goals</b></legend>
+<label>Start Year:  <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'></label>
+<input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
+<input type='submit' value='Create'>
+</fieldset>
+</form>
+<br><br>
+<div class='clearfix'></div>
+<br><br>
+
 {# <h1>Personal PDP for {{ sideDB.firstName }}</h1>
 <h2>{{ position }}</h2>
 <hr> #}
@@ -50,26 +63,23 @@
         <th class="th_even">Training?</th>
     </tr>
     
-    {% if goalsAvailable %}
-    
-    {% else %}
-    {% for j in [1, 2, 3, 4] -%}
+    {% for result in person_pdp %}
     <tr>
-        <td><textarea name='person_goals[]' rows='4' cols='30'></textarea></td>
+        <td><textarea name='person_goals[]' rows='4' cols='30'>{{ result.goal }}</textarea></td>
         <td><label><input type='radio' name='person_aligns[]' value='true' >Yes</label><br>
             <label><input type='radio' name='person_aligns[]' value='false' >No</label></td>
-        <td><textarea name='person_reason[]' rows='4' cols='30'></textarea></td>
-        <td><input type='text' name='person_deadline[]' size='10' value=''></td>
-        <td><input type='number' name='person_budget[]' size='10' value=''></td>
-        <td><select name="person_training[]" id="person_training">
+        <td><textarea name='person_reason[]' rows='4' cols='30'>{{ result.reason }}</textarea></td>
+        <td><input type='text' name='person_deadline[]' size='10' value='{{ result.deadline }}'></td>
+        <td><input type='number' name='person_budget[]' size='10' value='{{ result.budget }}'></td> 
+        <td><select name="person_training[]" id="person_training"> 
             {% for train in training -%}
-            <option value='{{ train.tid }}'>{{ train.courseName }}</option>
+            <option value='{{ train.tid }}' {% if train.tid == result.course %} selected {% endif %} >{{ train.courseName }}</option>
             {% endfor -%}
-            </select>
-            <input type='text' name='course_other[]'></td>
-    </tr>
-    {% endfor -%}
-    {% endif %}
+            </select> 
+            <input type='text' name='course_other[]' {% if result.course == 2 %} value='{{ result.courseOther }}' {% endif %}></td>
+    </tr> 
+    {% endfor %}
+    
     
 </table>
 <br>
@@ -96,7 +106,7 @@
         {% for opt in val_opts -%}
         <option value='{{ opt.vid }}'>{{ opt.option }}</option>
         {% endfor -%}
-        </select</td>
+        </select></td>
         <td><textarea cols='60' rows='2'></textarea>
     </tr>
     {% endfor %}

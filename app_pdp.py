@@ -187,7 +187,7 @@ class PeedyPee(object):
 
 
     @cherrypy.expose
-    def personalpdp(self,user=None,**kws):
+    def personalpdp(self,user=None,year=None,**kws):
         if self.loggedin():
             cookies = self.returnCookies()
             
@@ -196,15 +196,18 @@ class PeedyPee(object):
             uid = result['uid']
             userName = result['userName']
             
+            if year == None:
+                year = self.default_year()
+            
             error = ''
             if 'e' in kws:
                 error = kws['e']
             
             # enable managers and admin to view other pdps
             if user:
-                selectName = user
+                selectName = user #remote user
             else:
-                selectName = userName
+                selectName = userName #currently logged in user
             
             query = ("SELECT * FROM `person` WHERE userName='%s'" % selectName)
             select_dict = self.runQuery(query, all=0)
@@ -217,20 +220,26 @@ class PeedyPee(object):
             query = "SELECT * FROM `group` WHERE manager='%s'" % uid
             g_dict = self.runQuery(query)
             
+            # //TODO: Need to make sure getting current year and latest cycle
             query = "SELECT * FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
             gpdps = self.runQuery(query,all=1)
+
+            query = ("SELECT * FROM `person-pdp-data` WHERE (uid='%s' AND year='%s' AND cycle='%s')" %
+                    (select_dict['uid'],year,select_dict['cycle']))
+            pdp = self.runQuery(query,all=1)        
+            #error=query
 
             p_training = self.getTraining()
             p_values = self.getValues()
             p_compliance = self.getCompliance()
-            p_opt_val = self.getOptions(2)
-            p_opt_comp = self.getOptions(1)
+            p_opt_val = self.getOptions(2) #rarely/sometime/always
+            p_opt_comp = self.getOptions(1) #yes/no/maybe
 
             #error = p_opt_val
             
             t = jinja_env.get_template('personal_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,selectDB=select_dict,error=error,
-                            gpdps=gpdps,training=p_training,values=p_values,
+                            gpdps=gpdps,person_pdp=pdp,training=p_training,values=p_values,
                             compliance=p_compliance,val_opts=p_opt_val,comp_opts=p_opt_comp,
                             user=userName,title=cookies['title'],name=cookies['fname'])
             
@@ -411,6 +420,38 @@ class PeedyPee(object):
                          (groupName,yearSelect,yearSelect))
             
             raise cherrypy.HTTPRedirect(urlStr)
+    
+    @cherrypy.expose
+    def personalpdp_initialise(self, **kws):
+        if self.loggedin():
+            userName = kws['user_name']
+            yearSelect = kws['init_goals']
+            
+            if yearSelect == "":
+                urlStr = "/personalpdp/%s?e=No Year Selected" % userName
+                raise cherrypy.HTTPRequest(urlStr)
+            
+            query = "SELECT uid FROM `person` where userName='%s'" % userName
+            u_ref = self.runQuery(query,all=0)
+            
+            query = "SELECT uid FROM `person-pdp-data` WHERE (year='%s' AND uid='%s')" % (yearSelect,u_ref['uid'])
+            result = self.runQuery(query,all=0)
+            
+            if result:
+                urlStr = ("/personalpdp/%s/%s?e=Goals already initialised for year %s" %
+                            (userName,yearSelect,yearSelect))
+            else:
+                query = ("INSERT INTO `person-pdp-data` (uid,year,cycle) "
+                         "VALUES ('%s','%s',0)" % (u_ref['uid'],yearSelect))
+                for i in range(4):
+                    self.runQuery(query,read=0)
+                
+                urlStr = ("/personalpdp/%s/%s?e=Person PDP Initialised %s" %
+                         (userName,yearSelect,yearSelect))
+                         
+            
+            raise cherrypy.HTTPRedirect(urlStr)
+            
     
     @cherrypy.expose
     def grouppdp_changeyear(self,**kws):
