@@ -33,21 +33,31 @@ db = MySQLdb.connect(host=values['DB']['host'],user=values['DB']['dbuser'],
 class PeedyPee(object):
     
     def loggedin(self):
-        cookie = cherrypy.request.cookie
-        try:
-            if cookie['peedy-pee'].value:
-                return cookie['peedy-pee'].value
-            else:
-                return False
-        except:
+        #cookie = cherrypy.request.cookie
+        #try:
+        #    if cookie['peedy-pee'].value:
+        #        return cookie['peedy-pee'].value
+        #    else:
+        #        return False
+        #except:
+        #    return False
+        user = cherrypy.session.get('user')
+        if user:
+            return user
+        else:
             return False
 
     def returnCookies(self):
-        cookie = cherrypy.request.cookie
+        #cookie = cherrypy.request.cookie
         try:
-            user = cookie['peedy-pee'].value
-            fname = cookie['name'].value
-            position = cookie['position'].value
+            #user = cookie['peedy-pee'].value
+            #fname = cookie['name'].value
+            #position = cookie['position'].value
+            
+            user = cherrypy.session.get('user')
+            fname = cherrypy.session.get('name')
+            position = cherrypy.session.get('position')
+            
             return {'user': user, 'fname': fname,'title': position}
         except:
             return False
@@ -91,9 +101,11 @@ class PeedyPee(object):
     
     @cherrypy.expose
     def logout(self):
-        cookie = cherrypy.response.cookie
-        cookie['peedy-pee'] = False
-        cookie['peedy-pee']['expires'] = 0
+        #cookie = cherrypy.response.cookie
+        #cookie['peedy-pee'] = False
+        #cookie['peedy-pee']['expires'] = 0
+        
+        cherrypy.lib.sessions.expire()
         
         raise cherrypy.HTTPRedirect("/")
     
@@ -113,8 +125,11 @@ class PeedyPee(object):
 
         if (("username" in kws) and ("password" in kws)):
             user = kws['username']
-        #if "password" in kws:
             passw = kws['password']
+        else:
+            error = "No Username or Password provided..."
+            urlStr = "/login?e=%s" % error
+            raise cherrypy.HTTPRedirect(urlStr)
             
         #ldap_server = "10.7.0.243"    # ldap://
         #acct_sx = "@synchrotron.org.au"
@@ -135,18 +150,22 @@ class PeedyPee(object):
             position = result[0][1]['title'][0]
             name = result[0][1]['givenName'][0]
             
-            cookie =  cherrypy.response.cookie
-            cookie['peedy-pee'] = user
-            cookie['peedy-pee']['path'] = '/'
-            cookie['peedy-pee']['max-age'] = 7200
+            #cookie =  cherrypy.response.cookie
+            #cookie['peedy-pee'] = user
+            #cookie['peedy-pee']['path'] = '/'
+            #cookie['peedy-pee']['max-age'] = 7200
             
-            cookie['position'] = position
-            cookie['position']['path'] = '/'
-            cookie['position']['max-age'] = 7200
+            #cookie['position'] = position
+            #cookie['position']['path'] = '/'
+            #cookie['position']['max-age'] = 7200
             
-            cookie['name'] = name
-            cookie['name']['path'] = '/'
-            cookie['name']['max-age'] = 7200
+            #cookie['name'] = name
+            #cookie['name']['path'] = '/'
+            #cookie['name']['max-age'] = 7200
+            
+            cherrypy.session['user'] = user
+            cherrypy.session['position'] = position
+            cherrypy.session['name'] = name
             
             #t = jinja_env.get_template('index.html')
             connect.unbind_s()
@@ -848,8 +867,7 @@ config = {
     '/':
         {'tools.staticdir.debug': True,
          'log.screen': True,
-         'tools.sessions.on': True,
-         'tools.sessions.type': "ram",
+         'tools.sessions.on': True, # RAM is default storage type
          'tools.sessions.timeout': 360
         },
     '/templates':
