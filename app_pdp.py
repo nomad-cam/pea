@@ -279,9 +279,12 @@ class PeedyPee(object):
                 # Reference the group_member list
                 names = []
                 for j in range(len(kws['zid[]'])):
-                    tmpStr = "group_owners[%s]" % kws['zid[]'][j]
-                    names.append( map(int,kws[tmpStr] ))
-                    
+                    tmpStr = "group_owners[%s]" % kws['zid[]'][j] #contains owners list uid
+                    if tmpStr in kws:   # test if any value has been selected
+                        names.append(kws[tmpStr]) #append as string list
+                    else:
+                        names.append(0) #if no value selected set to 0
+                   
                             
                 # Save the current data
                 for j in range(len(kws['zid[]'])):
@@ -293,7 +296,7 @@ class PeedyPee(object):
                          kws['group_budget[]'][j],kws['group_training[]'][j],kws['zid[]'][j]))
                          
                      self.runQuery(query,read=0)
-                     #err = names
+                     err = "Group row data saved to DB"
                 
                 raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'% (group,year,err))                   
             

@@ -64,7 +64,9 @@ Group goals, place a blurb here
         {% for member in gMembers -%}
         <option value='{{ member.uid }}' 
         {%- for num in goal.owners -%}
-        {% if member.uid == num %} selected {%- endif -%}{%- endfor -%}>
+        {# {% if member.uid == num %} selected {%- endif -%} #}
+        {% if member.uid|string in goal.owners %} selected {% endif %}
+        {%- endfor -%}>
         {{- member.userName }}</option>{{ goal.owners }} {{ member.uid }}
         {% endfor -%}
         </select>
