@@ -15,6 +15,7 @@
 <form action='/personalpdp_initialise' method='POST'>
 <fieldset class='new-goals'>
 <legend><b>Initialise New Goals</b></legend>
+{# //TODO: poulate year field with available years in a dropdown #}
 <label>Start Year:  <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'></label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
 <input type='submit' value='Create'>
@@ -44,8 +45,12 @@
         <td>{{ goal.description }}</td>
         <td>{{ goal.owners }}</td>
         <td>{{ goal.deadline }}</td>
-        <td>{{ goal.budget }}</td>
-        <td>{{ goal.training }}</td>
+        <td>${{ goal.budget }}</td>
+        <td>{% if goal.course == 2 %}
+            {{ goal.courseOther }}
+            {% else %}
+            {{ goal.course }}
+            {% endif %}</td>
     </tr>
     {% endfor -%}
 </table>
