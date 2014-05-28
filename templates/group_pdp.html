@@ -76,10 +76,12 @@ Group goals, place a blurb here
                     
         <td><select name="group_training[]" id="group_training">
             {% for train in training -%}
-            <option value='{{ train.tid }}'>{{ train.courseName }}</option>
+            <option value='{{ train.tid }}' {% if train.tid == goal.course %} selected {% endif %}>
+            {{ train.courseName }}</option>
             {% endfor -%}
             </select>
-            <input type='text' name='course_other'></td>
+            <input type='text' name='course_other[]' {% if goal.course == 2 %}
+                value='{{ goal.courseOther }}' {% endif %}></td>
     </tr>
 {% endfor -%}
     

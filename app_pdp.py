@@ -248,22 +248,31 @@ class PeedyPee(object):
             current_cycle = self.runQuery(query, all=0)
             
             g_training = self.getTraining()
-            g_members = self.getGroupMembers(groupID['gid'])                       
+            g_members = self.getGroupMembers(groupID['gid']) 
             
             if 'add_group_row' in kws:
+                other = None
+                if "course_other[]" in kws:
+                    other = kws['course_other[]']
+            
                 # Reference the group_member list
                 names = []
-                for j in range(len(kws['zid[]'])):
+                for j in range(len(kws['zid[]'])):                    
                     tmpStr = "group_owners[%s]" % kws['zid[]'][j]
-                    names.append( map(int,kws[tmpStr] ))
+                    if tmpStr in kws:
+                        names.append( kws[tmpStr] )
+                    else:
+                        names.append(0)
                 
                 # First save data then add a new line                                
                 for j in range(len(kws['zid[]'])):
                     query = ("UPDATE `group-pdp-data` "
-                         "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', budget='%s', training='%s' "
+                         "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', "
+                         "budget='%s', course='%s', courseOther='%s' "
                          "WHERE zid='%s'" 
-                         % (kws['group_goal[]'][j],kws['group_owners[]'][j],kws['group_description[]'][j],
-                         kws['group_deadline[]'][j],kws['group_budget[]'][j],kws['group_training[]'][j],kws['zid[]'][j]))
+                         % (kws['group_goal[]'][j],json.dumps(names[j]),
+                         kws['group_description[]'][j],kws['group_deadline[]'][j],
+                         kws['group_budget[]'][j],kws['group_training[]'][j],other[j],kws['zid[]'][j]))
                          
                     self.runQuery(query,read=0)
                     
@@ -276,6 +285,10 @@ class PeedyPee(object):
                 raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'% (group,year,err))
             
             elif 'save_group_data' in kws:
+                other = None
+                if "course_other[]" in kws:
+                    other = kws['course_other[]']
+            
                 # Reference the group_member list
                 names = []
                 for j in range(len(kws['zid[]'])):
@@ -289,14 +302,15 @@ class PeedyPee(object):
                 # Save the current data
                 for j in range(len(kws['zid[]'])):
                      query = ("UPDATE `group-pdp-data` "
-                         "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', budget='%s', training='%s' "
+                         "SET goalTitle='%s', owners='%s', description='%s', deadline='%s', "
+                         "budget='%s', course='%s', courseOther='%s' "
                          "WHERE zid='%s'" 
                          % (kws['group_goal[]'][j],json.dumps(names[j]),
                          kws['group_description[]'][j],kws['group_deadline[]'][j],
-                         kws['group_budget[]'][j],kws['group_training[]'][j],kws['zid[]'][j]))
+                         kws['group_budget[]'][j],kws['group_training[]'][j],other[j],kws['zid[]'][j]))
                          
                      self.runQuery(query,read=0)
-                     err = "Group row data saved to DB"
+                err = "Group row data saved to DB"
                 
                 raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'% (group,year,err))                   
             
