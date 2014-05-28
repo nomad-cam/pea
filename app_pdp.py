@@ -33,14 +33,6 @@ db = MySQLdb.connect(host=values['DB']['host'],user=values['DB']['dbuser'],
 class PeedyPee(object):
     
     def loggedin(self):
-        #cookie = cherrypy.request.cookie
-        #try:
-        #    if cookie['peedy-pee'].value:
-        #        return cookie['peedy-pee'].value
-        #    else:
-        #        return False
-        #except:
-        #    return False
         user = cherrypy.session.get('user')
         if user:
             return user
@@ -48,12 +40,8 @@ class PeedyPee(object):
             return False
 
     def returnCookies(self):
-        #cookie = cherrypy.request.cookie
+        
         try:
-            #user = cookie['peedy-pee'].value
-            #fname = cookie['name'].value
-            #position = cookie['position'].value
-            
             user = cherrypy.session.get('user')
             fname = cherrypy.session.get('name')
             position = cherrypy.session.get('position')
@@ -66,8 +54,7 @@ class PeedyPee(object):
     def index(self,**kws):
         if self.loggedin():
             cookies = self.returnCookies()
-            #userName = cookies['user']
-            
+                        
             query = "SELECT uid FROM `person` WHERE userName='%s'" % cookies['user']
             uid = self.runQuery(query, all=0)['uid']
                         
@@ -84,9 +71,7 @@ class PeedyPee(object):
             
             query = "SELECT * FROM `group` WHERE manager='%s'" % uid
             g_dict = self.runQuery(query)
-            #uManager = result[0]['manager']
-            #return side_dict
-            
+                        
             query = "SELECT userName,firstName,lastName FROM `person` WHERE manager='%s'" % uid
             group_list = self.runQuery(query,all=1)
                         
@@ -96,14 +81,10 @@ class PeedyPee(object):
                             groupList=group_list)
         else:
             raise cherrypy.HTTPRedirect("/login")
-            #t = jinja_env.get_template('login.html')
-            #return t.render()
-    
+            
+                
     @cherrypy.expose
     def logout(self):
-        #cookie = cherrypy.response.cookie
-        #cookie['peedy-pee'] = False
-        #cookie['peedy-pee']['expires'] = 0
         
         cherrypy.lib.sessions.expire()
         
@@ -131,9 +112,6 @@ class PeedyPee(object):
             urlStr = "/login?e=%s" % error
             raise cherrypy.HTTPRedirect(urlStr)
             
-        #ldap_server = "10.7.0.243"    # ldap://
-        #acct_sx = "@synchrotron.org.au"
-        #base_dn = 'dc=synchrotron,dc=org,dc=au'
         ldap_server = values['LDAP']['ldap_server']
         acct_sx = values['LDAP']['acct_sx']
         base_dn = values['LDAP']['base_dn']
@@ -150,29 +128,14 @@ class PeedyPee(object):
             position = result[0][1]['title'][0]
             name = result[0][1]['givenName'][0]
             
-            #cookie =  cherrypy.response.cookie
-            #cookie['peedy-pee'] = user
-            #cookie['peedy-pee']['path'] = '/'
-            #cookie['peedy-pee']['max-age'] = 7200
-            
-            #cookie['position'] = position
-            #cookie['position']['path'] = '/'
-            #cookie['position']['max-age'] = 7200
-            
-            #cookie['name'] = name
-            #cookie['name']['path'] = '/'
-            #cookie['name']['max-age'] = 7200
-            
             cherrypy.session['user'] = user
             cherrypy.session['position'] = position
             cherrypy.session['name'] = name
             
-            #t = jinja_env.get_template('index.html')
             connect.unbind_s()
             
             raise cherrypy.HTTPRedirect('/')
-            #return t.render(user=user)
-
+            
         except ldap.LDAPError:
             connect.unbind_s()
             
@@ -211,9 +174,7 @@ class PeedyPee(object):
             
             query = ("SELECT * FROM `person` WHERE userName='%s'" % selectName)
             select_dict = self.runQuery(query, all=0)
-            
-            #userName = cookies['user']
-                
+                                        
             query = "SELECT * FROM `person` WHERE uid='%s'" % uid
             side_dict = self.runQuery(query)[0]
             
@@ -321,9 +282,7 @@ class PeedyPee(object):
                     tmpStr = "group_owners[%s]" % kws['zid[]'][j]
                     names.append( map(int,kws[tmpStr] ))
                     
-                # Convert list of strings to list of ints
-                #names = map(int, names)
-                
+                            
                 # Save the current data
                 for j in range(len(kws['zid[]'])):
                      query = ("UPDATE `group-pdp-data` "
@@ -701,8 +660,7 @@ class PeedyPee(object):
     @cherrypy.expose
     def groups(self):
         if self.loggedin():
-            #cur = db.cursor()
-            #cur.execute("SELECT * FROM `group`")
+            
             result={}
             g_query = "SELECT * FROM `group`"
             result = self.runQuery(g_query)
@@ -742,17 +700,7 @@ class PeedyPee(object):
         else:
             return False
             
-        #try:
-        #    cur_check.execute(query)
-        #    if cur_check.rowcount:
-        #        #cherrypy.log(cur_check.rowcount)
-        #        return cur_check.fetchone()
-        #    else:
-        #        return False
-        #except:
-        #    #return "Error! %d: %s" % (e.args[0],e.args[1])
-        #    return False
-    
+            
     @cherrypy.expose
     #Check if gname is in the database already        
     def isGroupDB(self,gname):
@@ -765,15 +713,7 @@ class PeedyPee(object):
             return result
         else:
             return False
-        #try:
-        #    cur_check.execute(query)
-        #    if cur_check.rowcount:
-        #        return cur_check.fetchone()
-        #    else:
-        #        return False
-        #except:
-        #    return False
-        
+                
     
     @cherrypy.expose
     #general db query helper
