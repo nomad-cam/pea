@@ -101,7 +101,8 @@
 </form>
 
 <h2>Values</h2>
-<form action='/personalpdp/{{ user }}' method='POST'>
+<form action='/personalpdp/{{ selectDB.userName }}' method='POST'>
+
 <table class='valuestable'>
     <tr>       
         <th class='th_top' colspan='3'>Values</th>
@@ -113,21 +114,22 @@
     </tr>
     {% for value in values %}
     <tr>
+        <input type='hidden' name="value_id[]" value='{{ value.vid }}'>
         <td>{{ value.value }}</td>
-        <td><select>
+        <td><select name='value_grade[]'>
         {% for opt in val_opts -%}
-        <option value='{{ opt.vid }}'>{{ opt.option }}</option>
+        <option value='{{ opt.oid }}'>{{ opt.option }}</option>
         {% endfor -%}
         </select></td>
-        <td><textarea cols='60' rows='2'></textarea>
+        <td><textarea cols='60' rows='2' name='value_comments[]'></textarea>
     </tr>
     {% endfor %}
 </table>
 <br>
-<input type='submit' value='Save Values Data'>
+<input type='submit' name='save_values' value='Save Values Data'>
 </form>
 <h2>Compliance</h2>
-<form action='' method='POST'>
+<form action='/personalpdp/{{ selectDB.userName }}' method='POST'>
 <table class='compliancetable'>
     <tr>
         <th class='th_top' colspan='3'>Compliance</th>
@@ -139,18 +141,19 @@
     </tr>
     {% for comply in compliance %}
     <tr>
+        <input type='hidden' name='comply_id[]' value='{{ comply.cid }}'>
         <td>{{ comply.area }}</td>
-        <td><select>
+        <td><select name='comply_grade[]'>
         {% for opt in comp_opts -%}
         <option value='{{ opt.oid }}'>{{ opt.option }}</option>
         {% endfor -%}
         </select></td>
-        <td><textarea cols='30' rows='2'></textarea>
+        <td><textarea cols='30' rows='2' name='comply_comments[]'></textarea>
     </tr>
     {% endfor %}
 </table>
 <br>
-<input type='submit' value='Save Compliance Data'>
+<input type='submit' name='save_compliance' value='Save Compliance Data'>
 </form>
 <br>
 <br>

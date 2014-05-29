@@ -259,6 +259,29 @@ class PeedyPee(object):
                 err = "User PDP data updated successfully..."
                 
                 raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'%(selectName,year,err))
+
+            if 'save_values' in kws:
+                #pass
+                #Test if values already written to DB for current user this year
+                query = "SELECT vid FROM `values-data` WHERE (uid='%s' AND year='%s')" % (select_dict['uid'],year)
+                result = self.runQuery(query,all=0)
+                
+                if not result:
+                    for k in range(len(kws['value_id[]'])):
+                        query = ("INSERT INTO `values-data` (uid,value,cycle,year,grade,comment) VALUES (%s,%s,%s,%s,%s,'%s') "
+                                % (select_dict['uid'],kws['value_id[]'][k],current_cycle['cycle'],
+                                year,kws['value_grade[]'][k],kws['value_comments[]'][k]) )
+                        self.runQuery(query,read=0)
+                    err = "Value data saved to DB..."
+                else:
+                    err = "Unable to update Values, data already saved..."
+                
+                #err += query
+                
+                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'%(selectName,year,err))
+                
+            if 'save_compliance' in kws:
+                pass
                 
             # //TODO: Need to make sure getting current year and latest cycle
             query = "SELECT * FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
