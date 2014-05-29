@@ -204,8 +204,7 @@ class PeedyPee(object):
                             aligns.append( 0 )
                     else:
                         aligns.append( 0 )
-                    
-                             
+                                                 
                 # First save data then add a new line                                
                 for j in range(len(kws['pid[]'])):
                     query = ("UPDATE `person-pdp-data` "
@@ -217,8 +216,7 @@ class PeedyPee(object):
                          kws['person_budget[]'][j],kws['person_training[]'][j],other[j],kws['pid[]'][j]))
                          
                     self.runQuery(query,read=0)
-                    
-                
+                                
                 # Second add a blank line to the DB before redirecting to same page
                 query = ("INSERT INTO `person-pdp-data` (uid, year, cycle)"
                          "VALUES (%s,%s,%s)" % (select_dict['uid'], year, current_cycle['cycle']))
@@ -228,8 +226,40 @@ class PeedyPee(object):
                 
                 raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'% (selectName,year,err))
                 
-            
-            
+            if 'save_pdp_data' in kws:
+                other = None
+                if "course_other[]" in kws:
+                    other = kws['course_other[]']
+        
+                aligns = []
+                for t in range(len(kws['pid[]'])):
+                    tmpStr = "person_aligns[%s]" % kws['pid[]'][t]
+                    #set value to false/0 if not set
+                    if tmpStr in kws:
+                        #convert true and false into 1 / 0
+                        if 'true' in kws[tmpStr]:
+                            aligns.append( 1 )
+                        else:
+                            aligns.append( 0 )
+                    else:
+                        aligns.append( 0 )
+                
+                #Save data
+                for j in range(len(kws['pid[]'])):
+                    query = ("UPDATE `person-pdp-data` "
+                         "SET goal='%s', align='%s', reason='%s', deadline='%s', "
+                         "budget='%s', course='%s', courseOther='%s' "
+                         "WHERE pid='%s'" 
+                         % (kws['person_goals[]'][j],aligns[j],
+                         kws['person_reason[]'][j],kws['person_deadline[]'][j],
+                         kws['person_budget[]'][j],kws['person_training[]'][j],other[j],kws['pid[]'][j]))
+                         
+                    self.runQuery(query,read=0)
+                
+                err = "User PDP data updated successfully..."
+                
+                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'%(selectName,year,err))
+                
             # //TODO: Need to make sure getting current year and latest cycle
             query = "SELECT * FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
             gpdps = self.runQuery(query,all=1)
