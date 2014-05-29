@@ -74,9 +74,12 @@
     
     {% for result in person_pdp %}
     <tr>
+        <input type='hidden' name='pid[]' value='{{ result.pid }}'>
         <td><textarea name='person_goals[]' rows='4' cols='30'>{{ result.goal }}</textarea></td>
-        <td><label><input type='radio' name='person_aligns[]' value='true' >Yes</label><br>
-            <label><input type='radio' name='person_aligns[]' value='false' >No</label></td>
+        <td><label><input type='radio' name='person_aligns[{{ result.pid }}]' value='true' 
+            {% if result.align %}checked{% endif %}>Yes</label><br>
+            <label><input type='radio' name='person_aligns[{{ result.pid }}]' value='false' 
+            {% if not result.align %}checked{% endif %}>No</label></td>
         <td><textarea name='person_reason[]' rows='4' cols='30'>{{ result.reason }}</textarea></td>
         <td><input type='text' name='person_deadline[]' size='10' value='{{ result.deadline }}'></td>
         <td><input type='number' name='person_budget[]' size='10' value='{{ result.budget }}'></td> 
