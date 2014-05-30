@@ -58,9 +58,14 @@ class PeedyPee(object):
             query = "SELECT uid FROM `person` WHERE userName='%s'" % cookies['user']
             uid = self.runQuery(query, all=0)['uid']
                         
-            err = ''
+            err = []
             if 'e' in kws:
-                err = kws['e']
+                err.append(kws['e'])
+                err.append(kws['ref'])
+                if 'id' in kws:
+                    err.append(kws['id'])
+                else:
+                    err.append('')
             
             query = "SELECT * FROM `person` WHERE uid='%s'" % uid
             side_dict = self.runQuery(query)[0]
@@ -94,9 +99,14 @@ class PeedyPee(object):
     def login(self, **kws):
         t = jinja_env.get_template('login.html')
         
-        err = ''
+        err = []
         if 'e' in kws:
-            err = kws['e']
+            err.append(kws['e'])
+            err.append(kws['ref'])
+            if 'id' in kws:
+                err.append(kws['id'])
+            else:
+                err.append('')
         
         return t.render(error=err)
     
@@ -104,12 +114,12 @@ class PeedyPee(object):
     def dologin(self, **kws):
 
 
-        if (("username" in kws) and ("password" in kws)):
+        if ((kws["username"]) and (kws["password"])):
             user = kws['username']
             passw = kws['password']
         else:
             error = "No Username or Password provided..."
-            urlStr = "/login?e=%s" % error
+            urlStr = "/login?e=%s&ref=/login" % (error)
             raise cherrypy.HTTPRedirect(urlStr)
             
         ldap_server = values['LDAP']['ldap_server']
@@ -140,7 +150,7 @@ class PeedyPee(object):
             connect.unbind_s()
             
             error = 'Incorrect Login Details. Please try again...'
-            urlStr = '/login?e=%s' % error
+            urlStr = '/login?e=%s&ref=/login' % (error)
             raise cherrypy.HTTPRedirect(urlStr)
 
     @cherrypy.expose
@@ -162,9 +172,18 @@ class PeedyPee(object):
             if year == None:
                 year = self.default_year()
             
-            error = ''
+            #refer = ''
+            error = []
+            #id = ''
             if 'e' in kws:
-                error = kws['e']
+                error.append( kws['e'] )
+                error.append( kws['ref'] )
+                if 'id' in kws:
+                    error.append( kws['id'] )
+                else:
+                    error.append('')
+            else:
+                error = ['','','']
             
             # enable managers and admin to view other pdps
             if user:
@@ -224,9 +243,10 @@ class PeedyPee(object):
                          "VALUES (%s,%s,%s)" % (select_dict['uid'], year, current_cycle['cycle']))
                 self.runQuery(query,read=0)
                 
-                err = "New line added to table... " + json.dumps(aligns)
+                err = "New line added to table... " #+ json.dumps(aligns)
+                refStr = cherrypy.request.path_info
                 
-                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'% (selectName,year,err))
+                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s/?e=%s&ref=%s&id=person_goals'% (selectName,year,err,refStr))
                 
             if 'save_pdp_data' in kws:
                 other = None
@@ -259,8 +279,9 @@ class PeedyPee(object):
                     self.runQuery(query,read=0)
                 
                 err = "User PDP data updated successfully..."
+                refStr = cherrypy.request.path_info
                 
-                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'%(selectName,year,err))
+                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s/?e=%s&ref=%s&id=person_goals#person_goals'%(selectName,year,err,refStr))
 
             if 'save_values' in kws:
                 #pass
@@ -279,8 +300,9 @@ class PeedyPee(object):
                     err = "Unable to update Values table, data already saved..."
                 
                 #err += query
+                refStr = cherrypy.request.path_info
                 
-                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'%(selectName,year,err))
+                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s/?e=%s&ref=%s&id=values#values'%(selectName,year,err,refStr))
                 
             if 'save_compliance' in kws:
                 #pass
@@ -298,9 +320,10 @@ class PeedyPee(object):
                 else:
                     err = "Unable to update Compliance table, data already saved..."
                 
-                #err += query
+                #err += cherrypy.request.browser_url
+                refStr = cherrypy.request.path_info
                 
-                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'%(selectName,year,err))
+                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s/?e=%s&ref=%s&id=compliance#compliance'%(selectName,year,err,refStr))
                 
             # //TODO: Need to make sure getting current year and latest cycle
             query = "SELECT * FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
@@ -352,9 +375,15 @@ class PeedyPee(object):
         if self.loggedin():
             cookies = self.returnCookies()
             
-            err = ''
+            err = []
             if 'e' in kws:
-                err = kws['e']
+                err.append( kws['e'] )
+                err.append( kws['ref'] )
+                if 'id' in kws:
+                    err.append( kws['id'] )
+                else:
+                    err.append('')
+                
             
             if year == None:
                 year = self.default_year()
@@ -413,7 +442,9 @@ class PeedyPee(object):
                          "VALUES (%s,%s,%s)" % (groupID['gid'], year, current_cycle['cycle']))
                 self.runQuery(query,read=0)
                 
-                raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'% (group,year,err))
+                #error = ""
+                
+                raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s&ref=%s'% (group,year,err,cherrypy.request.path_info))
             
             elif 'save_group_data' in kws:
                 other = None
@@ -443,7 +474,7 @@ class PeedyPee(object):
                      self.runQuery(query,read=0)
                 err = "Group row data saved to DB"
                 
-                raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'% (group,year,err))                   
+                raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s&ref=%s'% (group,year,err,cherrypy.request.path_info))
             
             query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND year='%s' AND cycle='%s')"
                     % (groupID['gid'], year, current_cycle['cycle']))
@@ -470,12 +501,14 @@ class PeedyPee(object):
                 signoff = 1
             else:
                 err = "The signoff box was not checked"
-                raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'%(group_url,year,err))
+                raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s&ref=/grouppdp/%s/%s'%(group_url,year,err,group_url,year))
             comments = kws['comments']
             next_cycle = int(cycle) + 1
             thisday = date.today().strftime("%Y/%m/%d")
             query = ( "SELECT gid FROM `group` WHERE urlName='%s'" % group_url )
             groupID = self.runQuery(query,all=0)
+            
+            # //TODO: verify operation of the hand-over procedure
             
             # "Store" the current cycle group goals and copy to new cycle
             query = ("INSERT INTO `group-pdp-data` "
@@ -493,7 +526,7 @@ class PeedyPee(object):
             self.runQuery(query,read=0)
             
             err="Signoff Complete. Progressed to Cycle: %s... %s" % (next_cycle,query)
-            raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s'%(group_url,year,err))
+            raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s&ref=/grouppdp/%s/%s'%(group_url,year,err,group_url,year))
             
 
     @cherrypy.expose
@@ -504,7 +537,7 @@ class PeedyPee(object):
             yearSelect = kws['init_goals']
             
             if yearSelect == "":
-                urlStr = "/grouppdp/%s?e=No Year Selected" % groupName
+                urlStr = "/grouppdp/%s?e=No Year Selected&ref=/grouppdp/%s" % (groupName,groupName)
                 raise cherrypy.HTTPRedirect(urlStr)
             
             query = "SELECT gid FROM `group` WHERE urlName='%s'" % groupName
@@ -515,16 +548,16 @@ class PeedyPee(object):
             
             #test if year in database already
             if result:
-                urlStr = ('/grouppdp/%s/%s?e=Goals already initialised for year %s' %
-                           (groupName,yearSelect,yearSelect))
+                urlStr = ('/grouppdp/%s/%s?e=Goals already initialised for year %s&ref=/grouppdp/%s/%s' %
+                           (groupName,yearSelect,yearSelect,groupName,yearSelect))
             else:    
                 query = ("INSERT INTO `group-pdp-data` (gid,year,cycle) "
                         "VALUES ('%s','%s','0')" % (g_ref['gid'],yearSelect))
                 for i in range(4):
                     self.runQuery(query,read=0)
             
-                urlStr = ("/grouppdp/%s/%s?e=Group PDP Initialised %s" % 
-                         (groupName,yearSelect,yearSelect))
+                urlStr = ("/grouppdp/%s/%s?e=Group PDP Initialised %s&ref=/grouppdp/%s/%s" % 
+                         (groupName,yearSelect,yearSelect,groupName,yearSelect))
             
             raise cherrypy.HTTPRedirect(urlStr)
     
@@ -535,8 +568,8 @@ class PeedyPee(object):
             yearSelect = kws['init_goals']
             
             if yearSelect == "":
-                urlStr = "/personalpdp/%s?e=No Year Selected" % userName
-                raise cherrypy.HTTPRequest(urlStr)
+                urlStr = "/personalpdp/%s?e=No Year Selected&ref=/personalpdp/%s" % (userName,userName)
+                raise cherrypy.HTTPRedirect(urlStr)
             
             query = "SELECT uid FROM `person` where userName='%s'" % userName
             u_ref = self.runQuery(query,all=0)
@@ -545,16 +578,16 @@ class PeedyPee(object):
             result = self.runQuery(query,all=0)
             
             if result:
-                urlStr = ("/personalpdp/%s/%s?e=Goals already initialised for year %s" %
-                            (userName,yearSelect,yearSelect))
+                urlStr = ("/personalpdp/%s/%s?e=Goals already initialised for year %s&ref=/personalpdp/%s/%s" %
+                            (userName,yearSelect,yearSelect,userName,yearSelect))
             else:
                 query = ("INSERT INTO `person-pdp-data` (uid,year,cycle) "
                          "VALUES ('%s','%s',0)" % (u_ref['uid'],yearSelect))
                 for i in range(4):
                     self.runQuery(query,read=0)
                 
-                urlStr = ("/personalpdp/%s/%s?e=Person PDP Initialised %s" %
-                         (userName,yearSelect,yearSelect))
+                urlStr = ("/personalpdp/%s/%s?e=Person PDP Initialised %s&ref=/personalpdp/%s/%s" %
+                         (userName,yearSelect,yearSelect,userName,yearSelect))
                          
             
             raise cherrypy.HTTPRedirect(urlStr)
@@ -620,11 +653,15 @@ class PeedyPee(object):
             g_dict = self.runQuery(query)
             
             #check for the error flag and send to template            
+            err = []
             if 'e' in kws:
-                err = kws['e']
-            else:
-                err = ""
-
+                err.append(kws['e'])
+                err.append(kws['ref'])
+                if 'id' in kws:
+                    err.append(kws['id'])
+                else:
+                    err.append('')
+                
             #Always display the group list and the user list
             query = ( "SELECT userName,firstName,lastName,isManager,uid "
                     "FROM `person` ORDER BY firstName" )
@@ -758,7 +795,7 @@ class PeedyPee(object):
                 connect.unbind_s()
                 error = 'Unable to process LDAP Request. Please try again...'
             
-                raise cherrypy.HTTPRedirect('/admin?e=%s' % error)
+                raise cherrypy.HTTPRedirect('/admin?e=%s&ref=/admin' % error)
         
             update = 0
         
@@ -799,7 +836,7 @@ class PeedyPee(object):
                 
             error = '''Staff database updated from the Active Directory. %s new Staff added. 
                        Manual editing may be required''' % update
-            raise cherrypy.HTTPRedirect('/admin?e=%s' % error)
+            raise cherrypy.HTTPRedirect('/admin?e=%s&ref=/admin' % error)
 
     def prettynames(self, uname_list):
         # Return a list of pretty names from a submitted username list
@@ -905,7 +942,7 @@ class PeedyPee(object):
             
             #group name not specified
             if g_name == "":
-                raise cherrypy.HTTPRedirect('/admin?e=noGroup')
+                raise cherrypy.HTTPRedirect('/admin?e=No group name selected')
             
             #Check if already in the DB
             if self.isGroupDB(g_name):
@@ -918,7 +955,7 @@ class PeedyPee(object):
                 
             self.runQuery(query,read=0)
             
-            urlStr = '/admin?e=Group Data Updated'
+            urlStr = '/admin?e=Group Data Updated for %s&ref=/admin' % g_name
             raise cherrypy.HTTPRedirect(urlStr)
             
         else:
@@ -956,7 +993,7 @@ class PeedyPee(object):
                 p_isadmin = 0
             
             if p_uname == "":
-                raise cherrypy.HTTPRedirect('/admin?e=noUser')
+                raise cherrypy.HTTPRedirect('/admin?e=noUser&ref=/admin')
             
 
             #If user already in Database the update, else add a new user
@@ -979,7 +1016,7 @@ class PeedyPee(object):
             
             self.runQuery(query,read=0)
 
-            urlStr = '/admin?e=User Data Updated'
+            urlStr = '/admin?e=User Data Updated for %s&ref=/admin'%p_uname
             raise cherrypy.HTTPRedirect(urlStr)
 
 #class Admin(object):

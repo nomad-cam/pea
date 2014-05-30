@@ -43,6 +43,17 @@ a:hover {
 
 .error {
   color: red;
+  padding: 10px 10px 10px 10px; /* top right bottom left */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  margin-left: -150px;
+  height: 70px;
+  margin-top: -35px;
+  background: yellow;
+  border: 2px solid red;
+  border-radius: 25px;
 }
 
 .login {

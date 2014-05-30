@@ -6,9 +6,14 @@
 
 
 {% block content %}
+
+{% if err[0] %}
 <div class='error'>
-{{ err }}
+{{ err[0] }}
+<br>
+[<a href='{{ err[1] }}'>OK</a>]
 </div>
+{% endif %}
 
 <h2>Group PDP Admin</h2>
 <form action='/grouppdp_initialise' method='POST'>
@@ -71,7 +76,7 @@ Group goals, place a blurb here
         </select>
         </td>
         <td><input type='text' name='group_deadline[]' size='10' value='{{ goal.deadline }}'></td>
-        <td><input type='number' name='group_budget[]' size='10' value='{{ goal.budget }}'></td>
+        <td>$ <input type='number' name='group_budget[]' size='10' value='{{ goal.budget }}'></td>
                     
         <td><select name="group_training[]" id="group_training">
             {% for train in training -%}

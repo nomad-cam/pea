@@ -7,10 +7,15 @@
 
 {% block content %}
 
+{% if error[0] %}
 <div class='error'>
-{{ error }}
+{{ error[0] }} 
+<br>
+[<a href='{{ error[1] }}#{{ error[2] }}'>OK</a>]
 </div>
+{% endif %}
 
+<a name='top'></a>
 <h2>Personal PDP Admin</h2>
 <form action='/personalpdp_initialise' method='POST'>
 <fieldset class='new-goals'>
@@ -28,6 +33,7 @@
 {# <h1>Personal PDP for {{ sideDB.firstName }}</h1>
 <h2>{{ position }}</h2>
 <hr> #}
+<a name='group_goals'></a>
 <h2>Group Goals for {{ selectDB.groupName }}</h2>
 <table class="grouptable">
     <tr>
@@ -60,6 +66,7 @@
 </table>
 <br>
 <br>
+<a name='person_goals'></a>
 <h2>Personal PDP Goals</h2>
 <form action='/personalpdp/{{user}}' method="POST">
 <table class="personaltable">
@@ -82,7 +89,7 @@
             {% if not result.align %}checked{% endif %}>No</label></td>
         <td><textarea name='person_reason[]' rows='4' cols='30'>{{ result.reason }}</textarea></td>
         <td><input type='text' name='person_deadline[]' size='10' value='{{ result.deadline }}'></td>
-        <td><input type='number' name='person_budget[]' size='10' value='{{ result.budget }}'></td> 
+        <td>$ <input type='number' name='person_budget[]' size='10' value='{{ result.budget }}'></td> 
         <td><select name="person_training[]" id="person_training"> 
             {% for train in training -%}
             <option value='{{ train.tid }}' {% if train.tid == result.course %} selected {% endif %} >{{ train.courseName }}</option>
@@ -100,6 +107,7 @@
 <input type="submit" name="save_pdp_data" value="Save PDP Data">
 </form>
 
+<a name='values'></a>
 <h2>Values</h2>
 <form action='/personalpdp/{{ selectDB.userName }}' method='POST'>
 
@@ -117,18 +125,23 @@
         <input type='hidden' name="value_id[]" value='{{ value.vid }}'>
         <td>{{ value.value }}</td>
         <td><select name='value_grade[]'>
+        {% if valuesDB %}
         {% set opt_id = valuesDB[ loop.index0 ].grade %}
+        {% else %}
+        {% set opt_id = 0 %}
+        {% endif %}
         {% for opt in val_opts -%}
         <option value='{{ opt.oid }}' {% if opt.oid == opt_id %}selected{% endif %}>{{ opt.option }}</option>
         {% endfor -%}
         </select></td>
-        <td><textarea cols='60' rows='2' name='value_comments[]'>{{ valuesDB[ loop.index0 ].comment }}</textarea>
+        <td><textarea cols='60' rows='2' name='value_comments[]'>{% if valuesDB %}{{ valuesDB[ loop.index0 ].comment }}{% endif %}</textarea>
     </tr>
     {% endfor %}
 </table>
 <br>
 <input type='submit' name='save_values' value='Save Values Data'>
 </form>
+<a name='compliance'></a>
 <h2>Compliance</h2>
 <form action='/personalpdp/{{ selectDB.userName }}' method='POST'>
 <table class='compliancetable'>
@@ -145,12 +158,16 @@
         <input type='hidden' name='comply_id[]' value='{{ comply.cid }}'>
         <td>{{ comply.area }}</td>
         <td><select name='comply_grade[]'>
+        {% if complianceDB %}
         {% set opt_id = complianceDB[ loop.index0 ].grade %}
+        {% else %}
+        {% set opt_id = 0 %}
+        {% endif %}
         {% for opt in comp_opts -%}
         <option value='{{ opt.oid }}' {% if opt.oid == opt_id %}selected{% endif %}>{{ opt.option }}</option>
         {% endfor -%}
         </select></td>
-        <td><textarea cols='30' rows='2' name='comply_comments[]'>{{ complianceDB[ loop.index0 ].comment }}</textarea>
+        <td><textarea cols='30' rows='2' name='comply_comments[]'>{% if complianceDB %}{{ complianceDB[ loop.index0 ].comment }}{% endif %}</textarea>
     </tr>
     {% endfor %}
 </table>
@@ -159,6 +176,7 @@
 </form>
 <br>
 <br>
+<a name='bottom'></a>
 <h2> Sign-off</h2>
 <label>Manager Sign-off<input type=checkbox name="manager-sign"></label>
 <br />

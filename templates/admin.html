@@ -6,9 +6,16 @@
 
 {% block content %}
 
+{% if error[0] %}
+<div class='error'>
+{{ error[0] }}
+<br>
+[<a href='{{ error[1] }}'>OK</a>]
+</div>
+{% endif %}
+
 <h1>Peedy-Pee Admin Page</h1>
 <br>
-<div class='error'>{{ error }}</div>
 <br>
 <h2>Edit People</h2>
 <hr>

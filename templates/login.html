@@ -3,7 +3,12 @@
 {% block login_content %}
     
     <div class='middle'>
-    <div class='error'>{{ error }}</div>
+    {% if error %}
+    <div class='error'>{{ error[0] }}
+    <br>
+    [<a href='{{ error[1] }}'>OK</a>]
+    </div>
+    {% endif %}
     <div class='inner'>
     <form action='/dologin' method='POST' >
         <label>Username: <input type='text' name='username'></label><br>

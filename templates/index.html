@@ -5,9 +5,12 @@
 {% endblock %}
 
 {% block content %}
+{% if error %}
 <div class='error'>
 {{ error }}
 </div>
+{% endif %}
+
 <h1> PDP - Home</h1>
 <hr>
 <h2> Personal PDP </h2>
