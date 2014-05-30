@@ -184,6 +184,8 @@ class PeedyPee(object):
             query = ("SELECT MAX(cycle) AS cycle FROM `person-pdp-data` "
                      "WHERE (uid='%s' AND year='%s')" % (select_dict['uid'],year))
             current_cycle = self.runQuery(query, all=0)
+            
+            
         
             if 'add_pdp_row' in kws:
                 #add another row to the database, first save the current edits...
@@ -274,14 +276,31 @@ class PeedyPee(object):
                         self.runQuery(query,read=0)
                     err = "Value data saved to DB..."
                 else:
-                    err = "Unable to update Values, data already saved..."
+                    err = "Unable to update Values table, data already saved..."
                 
                 #err += query
                 
                 raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'%(selectName,year,err))
                 
             if 'save_compliance' in kws:
-                pass
+                #pass
+                #Test if values already written to DB for current user this year
+                query = "SELECT cid FROM `compliance-data` WHERE (uid='%s' AND year='%s')" % (select_dict['uid'],year)
+                result = self.runQuery(query,all=0)
+                
+                if not result:
+                    for k in range(len(kws['comply_id[]'])):
+                        query = ("INSERT INTO `compliance-data` (uid,area,cycle,year,grade,comment) VALUES (%s,%s,%s,%s,%s,'%s') "
+                                % (select_dict['uid'],kws['comply_id[]'][k],current_cycle['cycle'],
+                                year,kws['comply_grade[]'][k],kws['comply_comments[]'][k]) )
+                        self.runQuery(query,read=0)
+                    err = "Compliance data saved to DB..."
+                else:
+                    err = "Unable to update Compliance table, data already saved..."
+                
+                #err += query
+                
+                raise cherrypy.HTTPRedirect('/personalpdp/%s/%s?e=%s'%(selectName,year,err))
                 
             # //TODO: Need to make sure getting current year and latest cycle
             query = "SELECT * FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
@@ -291,6 +310,15 @@ class PeedyPee(object):
                     %(select_dict['uid'],year,select_dict['cycle']))
             pdp = self.runQuery(query,all=1)        
             #error=query
+            
+            query = ("SELECT * FROM `values-data` WHERE (uid='%s' AND year='%s' AND cycle='%s')"
+                    %(select_dict['uid'],year,select_dict['cycle']))
+            values_data = self.runQuery(query, all=1)
+            
+            query = ("SELECT * FROM `compliance-data` WHERE (uid='%s' AND year='%s' AND cycle='%s')"
+                    %(select_dict['uid'],year,select_dict['cycle']))
+            compliance_data = self.runQuery(query, all=1)
+            
 
             p_training = self.getTraining()
             p_values = self.getValues()
@@ -304,6 +332,7 @@ class PeedyPee(object):
             return t.render(sideDB=side_dict,groupDB=g_dict,selectDB=select_dict,error=error,
                             gpdps=gpdps,person_pdp=pdp,training=p_training,values=p_values,
                             compliance=p_compliance,val_opts=p_opt_val,comp_opts=p_opt_comp,
+                            valuesDB=values_data,complianceDB=compliance_data,
                             user=userName,title=cookies['title'],name=cookies['fname'])
             
         else:

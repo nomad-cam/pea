@@ -117,11 +117,12 @@
         <input type='hidden' name="value_id[]" value='{{ value.vid }}'>
         <td>{{ value.value }}</td>
         <td><select name='value_grade[]'>
+        {% set opt_id = valuesDB[ loop.index0 ].grade %}
         {% for opt in val_opts -%}
-        <option value='{{ opt.oid }}'>{{ opt.option }}</option>
+        <option value='{{ opt.oid }}' {% if opt.oid == opt_id %}selected{% endif %}>{{ opt.option }}</option>
         {% endfor -%}
         </select></td>
-        <td><textarea cols='60' rows='2' name='value_comments[]'></textarea>
+        <td><textarea cols='60' rows='2' name='value_comments[]'>{{ valuesDB[ loop.index0 ].comment }}</textarea>
     </tr>
     {% endfor %}
 </table>
@@ -144,11 +145,12 @@
         <input type='hidden' name='comply_id[]' value='{{ comply.cid }}'>
         <td>{{ comply.area }}</td>
         <td><select name='comply_grade[]'>
+        {% set opt_id = complianceDB[ loop.index0 ].grade %}
         {% for opt in comp_opts -%}
-        <option value='{{ opt.oid }}'>{{ opt.option }}</option>
+        <option value='{{ opt.oid }}' {% if opt.oid == opt_id %}selected{% endif %}>{{ opt.option }}</option>
         {% endfor -%}
         </select></td>
-        <td><textarea cols='30' rows='2' name='comply_comments[]'></textarea>
+        <td><textarea cols='30' rows='2' name='comply_comments[]'>{{ complianceDB[ loop.index0 ].comment }}</textarea>
     </tr>
     {% endfor %}
 </table>
