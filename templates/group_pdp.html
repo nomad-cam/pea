@@ -37,9 +37,11 @@
 <br><br>
 <div class='clearfix'></div>
 <h1>Group PDP for {{ groupName }}</h1>
-<b>Group Manager: {{ manager }}</b>
-<br><br>
 <b>Current Cycle: {{ cycle }}</b>
+{% if cycle == 0 %}(Waiting for group goals to be set){% endif %}
+{% if cycle == 1 %}(Setting personal goals){% endif %}
+{% if cycle == 2 %}(Review and confirm personal goals){% endif %}
+{% if cycle == 3 %}(End of cycle assessment){% endif %}
 <br><br>
 <b>Current Year: {{ year }}</b>
 <hr>

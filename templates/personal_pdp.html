@@ -20,15 +20,32 @@
 <form action='/personalpdp_initialise' method='POST'>
 <fieldset class='new-goals'>
 <legend><b>Initialise New Goals</b></legend>
-{# //TODO: poulate year field with available years in a dropdown #}
+{# //TODO: poulate year field with available years fom grouppdp in a dropdown #}
 <label>Start Year:  <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'></label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
 <input type='submit' value='Create'>
 </fieldset>
 </form>
+<form action='/personalpdp_changeyear' method='POST'>
+<fieldset class='new-goals'>
+<legend><b>Select Year Goals</b></legend>
+{# //TODO: poulate year field with available years from personpdp in a dropdown #}
+<label>Year:  <input type="text" name='select_year' size='10' title='The year at the start of the pdp cycle'></label>
+<input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
+<input type='submit' value='Select'>
+</fieldset>
+</form>
 <br><br>
 <div class='clearfix'></div>
 <br><br>
+<b>Current Cycle: {{ selectDB.cycle }}</b>
+{% if selectDB.cycle == 0 %}(waiting for group goals to be set){% endif %}
+{% if selectDB.cycle == 1 %}(Setting personal goals){% endif %}
+{% if selectDB.cycle == 2 %}(Review and confirm personal goals){% endif %}
+{% if selectDB.cycle == 3 %}(End of cycle assessment){% endif %}
+<br><br>
+<b>Current Year: {{ selectDB.year }}</b>
+<hr>
 
 {# <h1>Personal PDP for {{ sideDB.firstName }}</h1>
 <h2>{{ position }}</h2>

@@ -73,10 +73,11 @@ class PeedyPee(object):
             title = side_dict['position']
             name = "%s %s" % ( side_dict['firstName'], side_dict['lastName'])
             
-            
             query = "SELECT * FROM `group` WHERE manager='%s'" % uid
             g_dict = self.runQuery(query)
-                        
+            
+            #g_name = convertGroup(g_dic)
+            
             query = "SELECT userName,firstName,lastName FROM `person` WHERE manager='%s'" % uid
             group_list = self.runQuery(query,all=1)
                         
@@ -182,8 +183,8 @@ class PeedyPee(object):
                     error.append( kws['id'] )
                 else:
                     error.append('')
-            else:
-                error = ['','','']
+            #else:
+            #    error = ['','','']
             
             # enable managers and admin to view other pdps
             if user:
@@ -350,6 +351,27 @@ class PeedyPee(object):
             compliance_data = self.runQuery(query, all=1)
             #cherrypy.log.error(query)
             
+            query = "SELECT DISTINCT year FROM `person-pdp-data` WHERE uid='%s'" % select_dict['uid']
+            avail_view_year = self.runQuery(query,all=1)
+            
+            query = "SELECT DISTINCT year FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
+            avail_init_year = self.runQuery(query,all=1)
+            
+            query = ("SELECT course,courseOther FROM `group-pdp-data` WHERE (gid='%s' AND year='%s' AND cycle='%s')"
+                    % (select_dict['groupName'],year,select_dict['cycle']))
+            result = self.runQuery(query,all=1)
+            cherrypy.log.error(json.dumps(result))
+            g_train_name = []
+            for k in range(len(result)):
+                if result[k]['course'] == 2:
+                    #if training couse is other get the course name
+                    g_train_name.append(result[k]['courseOther'])
+                else:
+                    #else convert the id to a course name
+                    g_train_name.append(self.convertTraining(result[k]['course']))
+
+            g_manager_name = self.convertUser(select_dict['manager'])
+            g_name = self.convertGroup(select_dict['groupName'])
 
             p_training = self.getTraining()
             p_values = self.getValues()
@@ -364,6 +386,8 @@ class PeedyPee(object):
                             gpdps=gpdps,person_pdp=pdp,training=p_training,values=p_values,
                             compliance=p_compliance,val_opts=p_opt_val,comp_opts=p_opt_comp,
                             valuesDB=values_data,complianceDB=compliance_data,ownersList=owner_list,
+                            aViewYear=avail_view_year,aInitYear=avail_init_year,gTrainName=g_train_name,
+                            gName=g_name,gManagerName=g_manager_name,
                             user=userName,title=cookies['title'],name=cookies['fname'])
             
         else:
@@ -642,19 +666,32 @@ class PeedyPee(object):
         #cherrypy.log.error(plist)
         uidStr = json.loads(plist)
         for j in range(len(uidStr)):
-            
-            #cherrypy.log.error(uidStr[j])
             query = ("SELECT userName FROM `person` WHERE uid='%s'" % uidStr[j])
-            #cherrypy.log.error(query)
             result = self.runQuery(query,all=0)
-            #cherrypy.log.error(json.dumps(result))
             if result:
                 userlist.append(result['userName'])
-                #pass
             else:
                 userlist.append('ALL')
-            
         return userlist
+
+    def convertTraining(self, trainId):
+        query = "SELECT courseName FROM `training` WHERE tid='%s'" % trainId
+        result = self.runQuery(query,all=0)
+        if result == 1:
+            return 'None'
+        else:
+            return result['courseName']
+        
+    def convertGroup(self,groupID):
+        #pass
+        query = "SELECT groupName FROM `group` WHERE gid='%s'" % groupID
+        return self.runQuery(query,all=0)['groupName']
+        
+    def convertUser(self,userID):
+        #pass
+        query = "SELECT firstName,lastName FROM `person` WHERE uid='%s'" % userID
+        result = self.runQuery(query,all=0)
+        return "%s %s" % (result['firstName'],result['lastName'])
     
     @cherrypy.expose
     def admin(self, **kws):
