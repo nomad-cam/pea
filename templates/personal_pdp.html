@@ -49,11 +49,12 @@
     <tr>
         <td>{{ goal.goalTitle }}</td>
         <td>{{ goal.description }}</td>
-        <td>{% if 0|string in goal.owners %}
-        ALL
-        {% else %}
-        {{ goal.owners }}
-        {% endif %}</td>
+        <td>
+        {% set oList = ownersList[loop.index0] %}
+        {% for owner in oList %}
+        {{ owner }}
+        {% endfor %}
+        </td>
         <td>{{ goal.deadline }}</td>
         <td>${{ goal.budget }}</td>
         <td>{% if goal.course == 2 %}

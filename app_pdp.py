@@ -328,7 +328,13 @@ class PeedyPee(object):
             # //TODO: Need to make sure getting current year and latest cycle
             query = "SELECT * FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
             gpdps = self.runQuery(query,all=1)
-
+            
+            owner_list = []
+            for l in range(len(gpdps)):
+                owner_list.append(self.convertUid(gpdps[l]['owners']))
+                #error[0] += gpdps[l]['owners']
+            #cherrypy.log.error(json.dumps(owner_list))
+            
             query = ("SELECT * FROM `person-pdp-data` WHERE (uid='%s' AND year='%s' AND cycle='%s')" 
                     %(select_dict['uid'],year,select_dict['cycle']))
             pdp = self.runQuery(query,all=1)        
@@ -355,7 +361,7 @@ class PeedyPee(object):
             return t.render(sideDB=side_dict,groupDB=g_dict,selectDB=select_dict,error=error,
                             gpdps=gpdps,person_pdp=pdp,training=p_training,values=p_values,
                             compliance=p_compliance,val_opts=p_opt_val,comp_opts=p_opt_comp,
-                            valuesDB=values_data,complianceDB=compliance_data,
+                            valuesDB=values_data,complianceDB=compliance_data,ownersList=owner_list,
                             user=userName,title=cookies['title'],name=cookies['fname'])
             
         else:
@@ -601,7 +607,7 @@ class PeedyPee(object):
             year = kws['year_goals']
             
             if year == "":
-                urlStr = ("/grouppdp/%s?e=No Year Selected" % name)
+                urlStr = ("/grouppdp/%s?e=No Year Selected&ref=/grouppdp/%s" % (name,name))
             else:
                 urlStr = ("/grouppdp/%s/%s" % (name,year))
                 
@@ -628,6 +634,25 @@ class PeedyPee(object):
         query = ("SELECT uid,firstName,lastName,userName FROM `person` "
                  "WHERE groupName='%s'" % gid)
         return self.runQuery(query,all=1)
+        
+    def convertUid(self,plist):
+        userlist = []
+        #cherrypy.log.error(plist)
+        uidStr = json.loads(plist)
+        for j in range(len(uidStr)):
+            
+            cherrypy.log.error(uidStr[j])
+            query = ("SELECT userName FROM `person` WHERE uid='%s'" % uidStr[j])
+            #cherrypy.log.error(query)
+            result = self.runQuery(query,all=0)
+            #cherrypy.log.error(json.dumps(result))
+            if result:
+                userlist.append(result['userName'])
+                #pass
+            else:
+                userlist.append('ALL')
+            
+        return userlist
     
     @cherrypy.expose
     def admin(self, **kws):
