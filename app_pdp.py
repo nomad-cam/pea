@@ -343,10 +343,12 @@ class PeedyPee(object):
             query = ("SELECT * FROM `values-data` WHERE (uid='%s' AND year='%s' AND cycle='%s')"
                     %(select_dict['uid'],year,select_dict['cycle']))
             values_data = self.runQuery(query, all=1)
+            #cherrypy.log.error(query)
             
             query = ("SELECT * FROM `compliance-data` WHERE (uid='%s' AND year='%s' AND cycle='%s')"
                     %(select_dict['uid'],year,select_dict['cycle']))
             compliance_data = self.runQuery(query, all=1)
+            #cherrypy.log.error(query)
             
 
             p_training = self.getTraining()
@@ -371,7 +373,7 @@ class PeedyPee(object):
         #pdp year starts at start of pdp year (financial year)
         #so to get in the right year cycle - need to set last year if in the new year
         
-        if date.today().month < 6:
+        if date.today().month <= 6:
             return date.today().year - 1
         else:
             return date.today().year
@@ -641,7 +643,7 @@ class PeedyPee(object):
         uidStr = json.loads(plist)
         for j in range(len(uidStr)):
             
-            cherrypy.log.error(uidStr[j])
+            #cherrypy.log.error(uidStr[j])
             query = ("SELECT userName FROM `person` WHERE uid='%s'" % uidStr[j])
             #cherrypy.log.error(query)
             result = self.runQuery(query,all=0)
