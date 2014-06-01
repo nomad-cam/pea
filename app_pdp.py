@@ -512,12 +512,20 @@ class PeedyPee(object):
                     % (groupID['gid'], year, current_cycle['cycle']))
             gpdps = self.runQuery(query, all=1)
             
-           
+            g_temp = []
+            for k in range(len(gpdps)):
+                if gpdps[k]['owners']:
+                    g_temp.append(json.loads(gpdps[k]['owners']))
+                else:
+                    g_temp.append('0') #default to all as ALL is always present in the template
+                
+            g_owners = [map(int, x) for x in g_temp]
+            
             t = jinja_env.get_template('group_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,err=err,training=g_training,
                             user=cookies['user'],title=cookies['title'],name=cookies['fname'],
                             year=year,cycle=current_cycle['cycle'],group_url=group,
-                            groupPDPs=gpdps,groupName=groupID['groupName'],
+                            groupPDPs=gpdps,groupName=groupID['groupName'],gOwners=g_owners,
                             manager=groupID['manager'],gMembers=g_members)
             
         else:

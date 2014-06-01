@@ -67,13 +67,14 @@ Group goals, place a blurb here
         <td>
         {# <input type='text' name='group_owners[]' size='10' value='{{ goal.owners }}'> #}
         <select multiple name='group_owners[{{ goal.zid }}]'>
-        <option value='0' {% if 0|string in goal.owners %}selected{% endif %}>All</option>
+        <option value='0' {% if 0 in gOwners[loop.index0] %}selected{% endif %}>All</option>{{ gOwners }}
+        {% set ownList = gOwners[loop.index0] %}
         {% for member in gMembers -%}
-        <option value='{{ member.uid }}' 
-        {%- for num in goal.owners -%}
-        {% if member.uid|string in goal.owners %} selected {% endif %}
-        {%- endfor -%}>
-        {{- member.userName }}</option>{{ goal.owners }} {{ member.uid }}
+        <option value='{{ member.uid -}}' 
+        {#- {%- for num in goal.owners -%} -#}
+        {%- if member.uid in ownList %} selected {%- endif -%}
+        {#- {%- endfor -%} -#}>
+        {{- member.userName }}</option>
         {% endfor -%}
         </select>
         </td>
