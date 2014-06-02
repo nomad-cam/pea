@@ -21,10 +21,10 @@
 <fieldset class='new-goals'>
 <legend><b>Initialise New Goals</b></legend>
 {# //TODO: poulate year field with available years fom grouppdp in a dropdown #}
-<label>Start Year:  <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'>
-{# <select name='init_goals' title='The year at the start of the pdp cycle'>
+<label>Start Year: {# <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'> #}
+<select name='init_goals' title='The year at the start of the pdp cycle'>
         {% for year in aInitYear %}<option value='{{ year.year }}'>{{ year.year }}</option>{% endfor %}
-        </select></label> ** Not Active ** {# Bug in list when more than one year.. #}
+        </select></label> {# Bug in list when more than one year.. #}
 </label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
 <input type='submit' value='Create' >
