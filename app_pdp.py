@@ -26,9 +26,10 @@ config_data = open('config.json')
 values = json.load(config_data)
 config_data.close()
 
-db = MySQLdb.connect(host=values['DB']['host'],user=values['DB']['dbuser'],
+"""db = MySQLdb.connect(host=values['DB']['host'],user=values['DB']['dbuser'],
                     passwd=values['DB']['password'],db=values['DB']['database'],
                     cursorclass=MySQLdb.cursors.DictCursor)
+"""
 
 class PeedyPee(object):
     
@@ -993,20 +994,31 @@ class PeedyPee(object):
     @cherrypy.expose
     #general db query helper
     def runQuery(self,query,all=1,read=1):
+        #Not very efficient, but avoids "db gone away' errors
+        db = MySQLdb.connect(host=values['DB']['host'],user=values['DB']['dbuser'],
+                passwd=values['DB']['password'],db=values['DB']['database'],
+                cursorclass=MySQLdb.cursors.DictCursor)
+        #open new cursor
         cur_run = db.cursor()
+                    
         try:
             cur_run.execute(query)
             db.commit()
             #return cur_run.fetchall()
             if read:
                 if all:
-                    return cur_run.fetchall()
+                    result = cur_run.fetchall()
+                    db.close()
+                    return result
                 else:
-                    return cur_run.fetchone()
+                    result = cur_run.fetchone()
+                    db.close()
+                    return result
             else:
                 return True
         except:
             db.rollback()
+            db.close()
             return {}
     
     @cherrypy.expose
