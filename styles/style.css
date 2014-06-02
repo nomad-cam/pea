@@ -119,6 +119,15 @@ input[type='radio'], label {
   clear: both;
 }
 
+.login_footer {
+  padding-top: 60px;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: center;
+  /*position: absolute;*/
+  clear: both;
+}
+
 .wrapper {
   position: relative;
 }
