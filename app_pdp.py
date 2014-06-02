@@ -672,14 +672,15 @@ class PeedyPee(object):
     def convertUid(self,plist):
         userlist = []
         #cherrypy.log.error(plist)
-        uidStr = json.loads(plist)
-        for j in range(len(uidStr)):
-            query = ("SELECT userName FROM `person` WHERE uid='%s'" % uidStr[j])
-            result = self.runQuery(query,all=0)
-            if result:
-                userlist.append(result['userName'])
-            else:
-                userlist.append('ALL')
+        if plist:
+            uidStr = json.loads(plist)
+            for j in range(len(uidStr)):
+                query = ("SELECT userName FROM `person` WHERE uid='%s'" % uidStr[j])
+                result = self.runQuery(query,all=0)
+                if result:
+                    userlist.append(result['userName'])
+                else:
+                    userlist.append('ALL')
         return userlist
 
     def convertTraining(self, trainId):
@@ -699,7 +700,10 @@ class PeedyPee(object):
         #pass
         query = "SELECT firstName,lastName FROM `person` WHERE uid='%s'" % userID
         result = self.runQuery(query,all=0)
-        return "%s %s" % (result['firstName'],result['lastName'])
+        if result:
+            return "%s %s" % (result['firstName'],result['lastName'])
+        else:
+            return "None"
     
     @cherrypy.expose
     def admin(self, **kws):
