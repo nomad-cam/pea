@@ -708,10 +708,13 @@ class PeedyPee(object):
     def convertTraining(self, trainId):
         query = "SELECT courseName FROM `training` WHERE tid='%s'" % trainId
         result = self.runQuery(query,all=0)
-        if result == 1:
-            return 'None'
+        if result:
+            if trainId == 1: #want to return None string not None type
+                return 'None'
+            else:
+                return result['courseName']
         else:
-            return result['courseName']
+            return 'None'
         
     def convertGroup(self,groupID):
         #pass
