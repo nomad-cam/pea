@@ -329,9 +329,11 @@ class PeedyPee(object):
                 
                 raise cherrypy.HTTPRedirect('/personalpdp/%s/%s/?e=%s&ref=%s&id=compliance#compliance'%(selectName,year,err,refStr))
                 
-            # //TODO: Need to make sure getting current year and latest cycle
-            query = "SELECT * FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
+            # Need to make sure getting current year and latest cycle
+            query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND cycle='%s' AND year='%s')" 
+                    % (select_dict['groupName'],select_dict['cycle'],year))
             gpdps = self.runQuery(query,all=1)
+            cherrypy.log.error(query)
             
             owner_list = []
             for l in range(len(gpdps)):
