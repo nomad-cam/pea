@@ -310,3 +310,6 @@ input[type='radio'], label {
   float: right;
 }
 
+#select_box {
+  width: 100px;
+}

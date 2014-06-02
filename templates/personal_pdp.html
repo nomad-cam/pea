@@ -21,9 +21,10 @@
 <fieldset class='new-goals'>
 <legend><b>Initialise New Goals</b></legend>
 {# //TODO: poulate year field with available years fom grouppdp in a dropdown #}
-<label>Start Year: {# <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'> #}
-<select name='init_goals' title='The year at the start of the pdp cycle'>
-        {% for year in aInitYear %}<option value='{{ year.year }}'>{{ year.year }}</option>{% endfor %}
+<label>Start Year: {# <input type="text" id='select_box' name='init_goals' size='10' title='The year at the start of the pdp 
+cycle'> #}
+<select name='init_goals' id='select_box' title='The year at the start of the pdp cycle'>
+        {% for year in aInitYear %}<option value='{{ year.year }}'>  {{ year.year }}  </option>{% endfor %}
         </select></label> {# Bug in list when more than one year.. #}
 </label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
@@ -34,7 +35,7 @@
 <fieldset class='new-goals'>
 <legend><b>Select Year Goals</b></legend>
 {# //TODO: poulate year field with available years from personpdp in a dropdown #}
-<label>Year: <select name='select_year' title='The year at the start of the pdp cycle'>
+<label>Year: <select name='select_year' id='select_box' title='The year at the start of the pdp cycle'>
         {% for year in aViewYear %}<option value='{{ year.year }}'>{{ year.year }}</option>{% endfor %}
         </select></label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
@@ -91,6 +92,10 @@
     </tr>
     {% endfor -%}
 </table>
+{% if not (gpdps) %}
+<br>
+** Waiting for Group Goals to be set by your Manager for the current year... 
+{% endif %}
 <br>
 <br>
 <a name='person_goals'></a>
@@ -134,8 +139,10 @@
 {% endif %}
 <br>
 <br>
+{% if (person_pdp) %}
 <input type="submit" name="add_pdp_row" value="Add Row">
 <input type="submit" name="save_pdp_data" value="Save PDP Data">
+{% endif %}
 </form>
 
 <a name='values'></a>
@@ -170,7 +177,9 @@
     {% endfor %}
 </table>
 <br>
+{% if (person_pdp) %}
 <input type='submit' name='save_values' value='Save Values Data'>
+{% endif %}
 </form>
 <a name='compliance'></a>
 <h2>Compliance</h2>
@@ -203,7 +212,9 @@
     {% endfor %}
 </table>
 <br>
+{% if (person_pdp) %}
 <input type='submit' name='save_compliance' value='Save Compliance Data'>
+{% endif %}
 </form>
 <br>
 <br>
