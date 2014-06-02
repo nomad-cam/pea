@@ -76,7 +76,9 @@ class PeedyPee(object):
             query = "SELECT * FROM `group` WHERE manager='%s'" % uid
             g_dict = self.runQuery(query)
             
-            #g_name = convertGroup(g_dic)
+            #used for side bar details
+            g_manager_name = self.convertUser(side_dict['manager'])
+            g_name = self.convertGroup(side_dict['groupName'])
             
             query = "SELECT userName,firstName,lastName FROM `person` WHERE manager='%s'" % uid
             group_list = self.runQuery(query,all=1)
@@ -84,7 +86,7 @@ class PeedyPee(object):
             t = jinja_env.get_template('index.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,error=err,
                             userName=userName,title=title,firstName=name,
-                            groupList=group_list)
+                            groupList=group_list,gName=g_name,gManagerName=g_manager_name)
         else:
             raise cherrypy.HTTPRedirect("/login")
             
@@ -360,7 +362,7 @@ class PeedyPee(object):
             query = ("SELECT course,courseOther FROM `group-pdp-data` WHERE (gid='%s' AND year='%s' AND cycle='%s')"
                     % (select_dict['groupName'],year,select_dict['cycle']))
             result = self.runQuery(query,all=1)
-            cherrypy.log.error(json.dumps(result))
+            #cherrypy.log.error(json.dumps(result))
             g_train_name = []
             for k in range(len(result)):
                 if result[k]['course'] == 2:
@@ -370,6 +372,7 @@ class PeedyPee(object):
                     #else convert the id to a course name
                     g_train_name.append(self.convertTraining(result[k]['course']))
 
+            #used for side bar details
             g_manager_name = self.convertUser(select_dict['manager'])
             g_name = self.convertGroup(select_dict['groupName'])
 
@@ -521,11 +524,16 @@ class PeedyPee(object):
                 
             g_owners = [map(int, x) for x in g_temp]
             
+            #used for side bar details
+            g_manager_name = self.convertUser(side_dict['manager'])
+            g_name = self.convertGroup(side_dict['groupName'])
+            
             t = jinja_env.get_template('group_pdp.html')
             return t.render(sideDB=side_dict,groupDB=g_dict,err=err,training=g_training,
                             user=cookies['user'],title=cookies['title'],name=cookies['fname'],
                             year=year,cycle=current_cycle['cycle'],group_url=group,
-                            groupPDPs=gpdps,groupName=groupID['groupName'],gOwners=g_owners,
+                            groupPDPs=gpdps,groupName=groupID['groupName'],
+                            gOwners=g_owners,gName=g_name,gManagerName=g_manager_name,
                             manager=groupID['manager'],gMembers=g_members)
             
         else:
@@ -834,8 +842,13 @@ class PeedyPee(object):
                                 
                 #Just display the basic page if no other data is requested    
             else:
+                #used for side bar details
+                g_manager_name = self.convertUser(user_dict['manager'])
+                g_name = self.convertGroup(user_dict['groupName'])
+            
                 return t.render(sideDB=user_dict,groupDB=g_dict,error=err,
                                 title=title,name=cookies['fname'],manager_dict=result_manager,
+                                gName=g_name,gManagerName=g_manager_name,
                                 people_dict=result_people,group_dict=result_group)
         else:
             #If not logged in the redirect to login page
