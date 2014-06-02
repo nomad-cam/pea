@@ -36,9 +36,9 @@
 {# //TODO: poulate year field with available years from personpdp in a dropdown #}
 <label>Year: <select name='select_year' title='The year at the start of the pdp cycle'>
         {% for year in aViewYear %}<option value='{{ year.year }}'>{{ year.year }}</option>{% endfor %}
-        </select></label> ** Not Active **
+        </select></label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
-<input type='submit' value='Select' disabled>
+<input type='submit' value='Select'>
 </fieldset>
 </form>
 <br><br>
@@ -128,6 +128,10 @@
     
     
 </table>
+{% if not (person_pdp) %}
+<br>
+** Please initialise your goals for the current year... This can be done using the Initialise New Goals button above...
+{% endif %}
 <br>
 <br>
 <input type="submit" name="add_pdp_row" value="Add Row">
