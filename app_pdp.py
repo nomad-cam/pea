@@ -682,8 +682,9 @@ class PeedyPee(object):
         #cherrypy.log.error(plist)
         if plist:
             uidStr = json.loads(plist)
-            for j in range(len(uidStr)):
-                query = ("SELECT userName FROM `person` WHERE uid='%s'" % uidStr[j])
+            #for j in range(len(uidStr)):
+            for uid in uidStr:
+                query = ("SELECT userName FROM `person` WHERE uid='%s'" % uid)
                 result = self.runQuery(query,all=0)
                 if result:
                     userlist.append(result['userName'])
