@@ -546,14 +546,20 @@ class PeedyPee(object):
     def grouppdp_signoff(self,**kws):
         if self.loggedin():
             group_url = kws['group_url']
-            year = kws['s_year']
-            cycle = kws['s_cycle']
+            year = kws['s_year'] #current year
+            cycle = kws['s_cycle'] #current cycle
             if 'manager-sign' in kws:
                 signoff = 1
             else:
                 err = "The signoff box was not checked"
                 raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s&ref=/grouppdp/%s/%s'%(group_url,year,err,group_url,year))
-            comments = kws['comments']
+            
+            # dont care if theres no comments...
+            if 'comments' in kws:
+                comments = kws['comments']
+            else:
+                comments = ''
+                
             next_cycle = int(cycle) + 1
             thisday = date.today().strftime("%Y/%m/%d")
             query = ( "SELECT gid FROM `group` WHERE urlName='%s'" % group_url )
@@ -575,6 +581,11 @@ class PeedyPee(object):
                      "VALUES ('%s','%s','%s','%s','%s','%s') "
                      % (groupID['gid'],year,cycle,thisday,signoff,comments))
             self.runQuery(query,read=0)
+            
+            #Only update person.cycle if it is currently set to 0
+            
+            # if person.cycle = 0
+            #    update to new cycle person.cycle
             
             err="Signoff Complete. Progressed to Cycle: %s... %s" % (next_cycle,query)
             raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s&ref=/grouppdp/%s/%s'%(group_url,year,err,group_url,year))
