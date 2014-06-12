@@ -982,11 +982,21 @@ class PeedyPee(object):
 
     #Check if the user is a manager
     def isManager(self,userID):
-        query = "SELECT userName FROM `person` WHERE uid='%s'" % userID
+        query = "SELECT isManager FROM `person` WHERE uid='%s'" % userID
         result = self.runQuery(query,all=0)
         
-        if result:
-            return result
+        if result['isManager']:
+            return True
+        else:
+            return False
+            
+    #Check if the user is an Admin
+    def isAdmin(self,userID):
+        query = "SELECT isAdmin FROM `person` WHERE uid='%s'" % userID
+        result = self.runQuery(query,all=0)
+        
+        if result['isAdmin']:
+            return True
         else:
             return False
         
