@@ -191,7 +191,11 @@ class PeedyPee(object):
             
             # enable managers and admin to view other pdps
             if user:
-                selectName = user #remote user
+                #must be admin or manager to view others pdp
+                if (self.isAdmin(uid) or self.isManager(uid)):
+                    selectName = user #remote user
+                else:
+                    selectName = userName
             else:
                 selectName = userName #currently logged in user
             
@@ -770,12 +774,16 @@ class PeedyPee(object):
         t = jinja_env.get_template('admin.html')
         
         if self.loggedin():
+            
             cookies = self.returnCookies()
             
             #userName = cookies['user']
             
             query = "SELECT uid FROM `person` WHERE userName='%s'" % cookies['user']
             uid = self.runQuery(query,all=0)['uid']
+            
+            if not self.isAdmin(uid):
+                raise cherrypy.HTTPRedirect('/')
             
             #return json.dumps(uid)
             #title = cookies['title']
