@@ -614,7 +614,7 @@ class PeedyPee(object):
                            (groupName,yearSelect,yearSelect,groupName,yearSelect))
             else:    
                 query = ("INSERT INTO `group-pdp-data` (gid,year,cycle) "
-                        "VALUES ('%s','%s','0')" % (g_ref['gid'],yearSelect))
+                        "VALUES ('%s','%s','1')" % (g_ref['gid'],yearSelect))
                 for i in range(4):
                     self.runQuery(query,read=0)
             
@@ -639,17 +639,38 @@ class PeedyPee(object):
             query = "SELECT uid FROM `person-pdp-data` WHERE (year='%s' AND uid='%s')" % (yearSelect,u_ref['uid'])
             result = self.runQuery(query,all=0)
             
+            # Test if results are already in the database for current year
             if result:
                 urlStr = ("/personalpdp/%s/%s?e=Goals already initialised for year %s&ref=/personalpdp/%s/%s" %
                             (userName,yearSelect,yearSelect,userName,yearSelect))
             else:
+                # //TODO: pre load the relevent group goals
+                query = ("SELECT * FROM `group-pdp-data` WHERE owners LIKE '%%\"%s\"%%' " % u_ref['uid'])
+                resDict = self.runQuery(query,all=1)
+                
+                #err = json.dumps(len(resDict))
+                if resDict:
+                    for k in range(len(resDict)):
+                        query = ("INSERT INTO `person-pdp-data` (uid,cycle,year,goal,align,reason,deadline,"
+                             "course,courseOther) "
+                             "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s')"
+                             % (u_ref['uid'],resDict[k]['cycle'],resDict[k]['year'],resDict[k]['goalTitle'],
+                                1,resDict[k]['description'],resDict[k]['deadline'],resDict[k]['course'],
+                                resDict[k]['courseOther']))
+                        self.runQuery(query,read=0)
+                        err = query
+                
+                
+                
+                # start out in cycle 1 of current year
                 query = ("INSERT INTO `person-pdp-data` (uid,year,cycle) "
-                         "VALUES ('%s','%s',0)" % (u_ref['uid'],yearSelect))
-                for i in range(4):
+                         "VALUES ('%s','%s',1)" % (u_ref['uid'],yearSelect))
+                for i in range(4-len(resDict)):
+                    #Insert 4 blank lines
                     self.runQuery(query,read=0)
                 
-                urlStr = ("/personalpdp/%s/%s?e=Person PDP Initialised %s&ref=/personalpdp/%s/%s" %
-                         (userName,yearSelect,yearSelect,userName,yearSelect))
+                urlStr = ("/personalpdp/%s/%s?e=Person PDP Initialised %s... %s&ref=/personalpdp/%s/%s" %
+                         (userName,yearSelect,yearSelect,err,userName,yearSelect))
                          
             
             raise cherrypy.HTTPRedirect(urlStr)
