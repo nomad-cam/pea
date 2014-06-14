@@ -26,10 +26,10 @@ config_data = open('config.json')
 values = json.load(config_data)
 config_data.close()
 
-"""db = MySQLdb.connect(host=values['DB']['host'],user=values['DB']['dbuser'],
-                    passwd=values['DB']['password'],db=values['DB']['database'],
-                    cursorclass=MySQLdb.cursors.DictCursor)
-"""
+#db = MySQLdb.connect(host=values['DB']['host'],user=values['DB']['dbuser'],
+#                    passwd=values['DB']['password'],db=values['DB']['database'],
+#                    cursorclass=MySQLdb.cursors.DictCursor)
+
 
 class PeedyPee(object):
     
@@ -334,7 +334,7 @@ class PeedyPee(object):
                 raise cherrypy.HTTPRedirect('/personalpdp/%s/%s/?e=%s&ref=%s&id=compliance#compliance'%(selectName,year,err,refStr))
                 
             # Need to make sure getting current year and latest cycle
-            query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND cycle='%s' AND year='%s')" 
+            query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND cycle='%s' AND year='%s' AND visible=1)" 
                     % (select_dict['groupName'],select_dict['cycle'],year))
             gpdps = self.runQuery(query,all=1)
             cherrypy.log.error(query)
@@ -564,21 +564,41 @@ class PeedyPee(object):
             else:
                 comments = ''
                 
+            last_cycle = int(cycle) - 1
             next_cycle = int(cycle) + 1
+            # cycle range is 1 to 3
+            #//TODO: determine actions when complete cycle 3...
+            if next_cycle > 3:
+                next_cycle = 1
+                #//TODO: update year also
+            
             thisday = date.today().strftime("%Y/%m/%d")
             query = ( "SELECT gid FROM `group` WHERE urlName='%s'" % group_url )
             groupID = self.runQuery(query,all=0)
             
             # //TODO: verify operation of the hand-over procedure
             
-            # "Store" the current cycle group goals and copy to new cycle
-            query = ("INSERT INTO `group-pdp-data` "
-                    "(gid,cycle,year,goalTitle,description,owners,deadline,budget,training) "                                          
-                     "SELECT gid,'%s',year,goalTitle,description,owners,deadline,budget,training "
-                     "FROM `group-pdp-data` "
-                     "WHERE (gid='%s' AND cycle='%s')" % (next_cycle,groupID['gid'],cycle))
+            # //TODO: implement the visible variable in DB
+            #set current cycle to visible
+            query = ("UPDATE `group-pdp-data` SET visible=1 WHERE (gid='%s' AND cycle='%s' AND year='%s')"
+                    % (groupID['gid'],cycle,year) )
             self.runQuery(query,read=0)
             
+            #set last cycle to not visible
+            #if current cycle is 1, then there is no last_cycle to set... so keep calm and carry on
+            if last_cycle:
+                query = ("UPDATE `group-pdp-data` SET visible=0 WHERE (gid='%s' AND cycle='%s' AND year='%s')"
+                    % (groupID['gid'],last_cycle,year) )
+                self.runQuery(query,read=0)
+            
+            # "Store" the current cycle group goals and copy to new cycle            
+            query = ("INSERT INTO `group-pdp-data` "
+                    "(gid,cycle,year,goalTitle,description,owners,deadline,budget,course,courseOther) "
+                     "SELECT gid,'%s',year,goalTitle,description,owners,deadline,budget,course,courseOther "
+                     "FROM `group-pdp-data` "
+                     "WHERE (gid='%s' AND cycle='%s' AND year='%s')" % (next_cycle,groupID['gid'],cycle,year))
+            self.runQuery(query,read=0)
+            err=query
             #Save the sign off data...
             query = ("INSERT INTO `group-pdp-signoff` "
                      "(gid,year,cycle,date,manager_checked,comments) "
@@ -591,7 +611,7 @@ class PeedyPee(object):
             # if person.cycle = 0
             #    update to new cycle person.cycle
             
-            err="Signoff Complete. Progressed to Cycle: %s... %s" % (next_cycle,query)
+#            err="Signoff Complete. Progressed to Cycle: %s..." % (next_cycle)
             raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s&ref=/grouppdp/%s/%s'%(group_url,year,err,group_url,year))
             
 
@@ -673,6 +693,7 @@ class PeedyPee(object):
                     #Insert 4 blank lines
                     self.runQuery(query,read=0)
                 
+                err = ''
                 urlStr = ("/personalpdp/%s/%s?e=Person PDP Initialised %s... %s&ref=/personalpdp/%s/%s" %
                          (userName,yearSelect,yearSelect,err,userName,yearSelect))
                          
