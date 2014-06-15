@@ -337,7 +337,7 @@ class PeedyPee(object):
             query = ("SELECT * FROM `group-pdp-data` WHERE (gid='%s' AND cycle='%s' AND year='%s' AND visible=1)" 
                     % (select_dict['groupName'],select_dict['cycle'],year))
             gpdps = self.runQuery(query,all=1)
-            cherrypy.log.error(query)
+            #cherrypy.log.error(query)
             
             owner_list = []
             for l in range(len(gpdps)):
@@ -548,9 +548,108 @@ class PeedyPee(object):
 
 
     @cherrypy.expose
-    def personalpdp_signoff(self,**kws):
+    def personalpdp_signoff(self,userName,**kws):
         if self.loggedin():
-            raise cherrypy.HTTPRedirect('/personalpdp')
+            cycle = int(kws['p_cycle'])
+            year = int(kws['p_year'])
+            
+            err = json.dumps(kws)
+            
+            if 'employee-sign' in kws:
+                emp_sign = 1
+            else:
+                emp_sign = ""
+                
+            if 'employee-comment' in kws:
+                emp_comment = kws['employee-comment']
+            else:
+                emp_comment = "No Comment"
+                
+            if 'manager-sign' in kws:
+                man_sign = 1
+            else:
+                #The manager should sign off first (or at same time)
+                err = "A manager has not signed off on this PDP"
+                ref = ('/personalpdp/%s#botom' % userName)
+                raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=%s#bottom' % (userName,err,ref))
+            
+            thisday = date.today().strftime("%Y/%m/%d")
+            next_cycle = cycle + 1
+            
+            if next_cycle > 3:
+                next_cycle = 1
+                year = year + 1
+            
+            #Get the uid
+            query = "SELECT uid FROM `person` WHERE userName='%s'" % userName
+            userID = self.runQuery(query,all=0)
+            
+            #Check if there is already an entry in the DB (ie if man has signed but not emp)
+            query = ("SELECT `manager-sign`,`person-sign` FROM `person-pdp-signoff` WHERE (uid='%s' AND cycle='%s' AND year='%s')"
+                    % (userID['uid'], cycle, year))
+            result = self.runQuery(query,all=0)
+            
+            
+            if result:
+                # manager must have signed if employee has signed...
+                if result['person-sign']:
+                    err = "The PDP for this cycle has already been signed off"
+                    ref = ('/personalpdp/%s#botom' % userName)
+                    raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=%s' % (userName,err,ref))
+                
+                # update the record with the employee sign off
+                else:
+                    query = ("UPDATE `person-pdp-signoff` SET `person-sign`='%s',`person-date`='%s',`person-comment`='%s' "
+                             "WHERE (uid='%s' AND cycle='%s' AND year='%s')"
+                             % (emp_sign,thisday,emp_comment,userID['uid'],cycle,year))
+                    self.runQuery(query,read=0)
+                    #cherrypy.log.error(query)
+                    self.updateUserCycle(userID['uid'],next_cycle,year)
+                
+            else:
+                # insert a new field in table
+                query = ("INSERT INTO `person-pdp-signoff` (uid,year,cycle,`manager-sign`,`manager-date`,"
+                         "`person-sign`,`person-date`,`person-comment`) "
+                         "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s')"
+                         % (userID['uid'],year,cycle,man_sign,thisday,emp_sign,thisday,emp_comment) )
+                self.runQuery(query,read=0)
+                #cherrypy.log.error(query)
+                
+                if emp_sign and man_sign:
+                    #update the employee cycle +1
+                    self.updateUserCycle(userID['uid'],next_cycle,year)
+                    
+                    
+                    
+                    
+            err = "The PDP for this cycle has now been signed off"
+            ref = ('/personalpdp/%s#botom' % userName)
+            raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=%s' % (userName,err,ref))
+                
+        
+            #raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=/personalpdp/%s#bottom' % (userName,err,userName))
+
+
+    def updateUserCycle(self,uid,cycle,year):
+        # Update the cycle count in the `person` table
+        query = ("UPDATE `person` SET cycle='%s',year='%s' WHERE uid='%s'" 
+                 % (cycle,year,uid))
+        self.runQuery(query,read=0)
+        
+        last_cycle = cycle - 1
+        
+        
+        query = ("INSERT INTO `person-pdp-data` (uid,cycle,year,goal,align,reason,"
+                "deadline,budget,course,courseOther,comments) " 
+                "SELECT uid,%s,%s,goal,align,reason,deadline,budget,course,courseOther,comments "
+                "FROM `person-pdp-data` "
+                "WHERE (uid='%s' AND year='%s' AND cycle='%s')"
+                % (cycle,year,uid,year,last_cycle))
+        self.runQuery(query,read=0)
+        
+        
+        return True
+        
 
 
     @cherrypy.expose
