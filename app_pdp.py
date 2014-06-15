@@ -546,6 +546,13 @@ class PeedyPee(object):
         else:
             raise cherrypy.HTTPRedirect('/login')
 
+
+    @cherrypy.expose
+    def personalpdp_signoff(self,**kws):
+        if self.loggedin():
+            raise cherrypy.HTTPRedirect('/personalpdp')
+
+
     @cherrypy.expose
     def grouppdp_signoff(self,**kws):
         if self.loggedin():

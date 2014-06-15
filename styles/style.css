@@ -212,6 +212,10 @@ input[type='radio'], label {
   width:300px;
 }
 
+.change-year-form{
+  height: 120px;
+}
+
 #person_div {
   height: 200px;
   width: 900px;
@@ -313,3 +317,5 @@ input[type='radio'], label {
 #select_box {
   width: 100px;
 }
+
+

@@ -20,31 +20,29 @@
 <form action='/personalpdp_initialise' method='POST'>
 <fieldset class='new-goals'>
 <legend><b>Initialise New Goals</b></legend>
-{# //TODO: poulate year field with available years fom grouppdp in a dropdown #}
-<label>Start Year: {# <input type="text" id='select_box' name='init_goals' size='10' title='The year at the start of the pdp 
-cycle'> #}
+<label>Start Year: 
 <select name='init_goals' id='select_box' title='The year at the start of the pdp cycle'>
         {% for year in aInitYear %}<option value='{{ year.year }}'>  {{ year.year }}  </option>{% endfor %}
-        </select></label> {# Bug in list when more than one year.. #}
+        </select> {# Bug in list when more than one year.. #}
 </label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
-<input type='submit' value='Create' >
+<input type='submit' value='Create' ><br><br>
+To get the new cycle started please select a year and click 'Create'.
 </fieldset>
 </form>
-<form action='/personalpdp_changeyear' method='POST'>
+<form action='/personalpdp_changeyear' method='POST' class='change-year-form'>
 <fieldset class='new-goals'>
 <legend><b>Select Year Goals</b></legend>
-{# //TODO: poulate year field with available years from personpdp in a dropdown #}
 <label>Year: <select name='select_year' id='select_box' title='The year at the start of the pdp cycle'>
         {% for year in aViewYear %}<option value='{{ year.year }}'>{{ year.year }}</option>{% endfor %}
         </select></label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
-<input type='submit' value='Select'>
+<input type='submit' value='Select'><br><br>
+To view a previously completed year please select a year and click 'Select'.
 </fieldset>
 </form>
-<br><br>
 <div class='clearfix'></div>
-<br><br>
+<br>
 <b>Current Cycle: {{ selectDB.cycle }}</b>
 {% if selectDB.cycle == 0 %}(waiting for group goals to be set){% endif %}
 {% if selectDB.cycle == 1 %}(Setting personal goals){% endif %}
@@ -52,7 +50,7 @@ cycle'> #}
 {% if selectDB.cycle == 3 %}(End of cycle assessment){% endif %}
 <br><br>
 <b>Current Year: {{ selectDB.year }}</b>
-<br>
+<br><br>
 <hr>
 
 {# <h1>Personal PDP for {{ sideDB.firstName }}</h1>
@@ -109,6 +107,9 @@ cycle'> #}
         <th class="th_even">Deadline</th>
         <th class="th_odd">Budget</th>
         <th class="th_even">Training?</th>
+        {% if selectDB.cycle == 3 %}
+        <th class="t_odd">Comments</th>
+        {% endif %}
     </tr>
     
     {% for result in person_pdp %}
@@ -128,6 +129,9 @@ cycle'> #}
             {% endfor -%}
             </select> 
             <input type='text' name='course_other[]' {% if result.course == 2 %} value='{{ result.courseOther }}' {% endif %}></td>
+        {% if selectDB.cycle == 3 %}
+        <td><textarea name='manager_comments[]' rows='4' cols='30'>{{ result.comments }}</textarea></td>
+        {% endif %}
     </tr> 
     {% endfor %}
     
@@ -220,9 +224,15 @@ cycle'> #}
 <br>
 <a name='bottom'></a>
 <h2> Sign-off</h2>
+<form action='/personalpdp_signoff/{{ selectDB.userName }}' method='POST'>
+<input type='hidden' name='p_cycle' value='{{ selectDB.cycle }}'>
+<input type='hidden' name='p_year' value='{{ selectDB.year }}'
 <label>Manager Sign-off<input type=checkbox name="manager-sign"></label>
 <br />
 <label>Employee Sign-off<input type=checkbox name="employee-sign"></label>
 <br />
-<label>Emplyee Comments<textarea rows='4' cols='20'></textarea></label>
+<label>Emplyee Comments<textarea name='employee-comment' rows='4' cols='20'></textarea></label>
+<br>
+<input type='submit' name='complete_cycle' value='Sign-off Cycle {{ selectDB.cycle }}'>
+</form>
 {% endblock %}
