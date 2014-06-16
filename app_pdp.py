@@ -858,9 +858,16 @@ class PeedyPee(object):
     def convertUid(self,plist):
         userlist = []
         #cherrypy.log.error(plist)
+        
         if plist:
             uidStr = json.loads(plist)
             #for j in range(len(uidStr)):
+            #cherrypy.log.error(uidStr)
+            if type(uidStr) is list:
+                plist = plist
+            else:
+                plist = [plist]
+                
             for uid in uidStr:
                 query = ("SELECT userName FROM `person` WHERE uid='%s'" % uid)
                 result = self.runQuery(query,all=0)
