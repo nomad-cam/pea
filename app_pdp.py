@@ -14,6 +14,8 @@ import json
 import string
 from datetime import date
 
+from help import Help
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates/')
 STYLES_DIR = os.path.join(BASE_DIR,'styles/')
@@ -1409,6 +1411,7 @@ config = {
 
 cherrypy.tree.mount(PeedyPee(),'/', config=config)
 #cherrypy.tree.mount(Admin(),'/admin', config=config)
+cherrypy.tree.mount(Help(), '/help', config=config)
 cherrypy.engine.autoreload.on = True
 cherrypy.engine.autoreload.frequency = 5
 cherrypy.engine.autoreload.files.add('app_pdp.py') #remove for production
