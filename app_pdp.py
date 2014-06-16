@@ -620,14 +620,16 @@ class PeedyPee(object):
                          % (userID['uid'],cycle,year))
                 numComm = self.runQuery(query,all=0)
                 query = ("SELECT COUNT(uid) FROM `person-pdp-data` "
-                         "WHERE (uid='%s' AND cycle='%s' AND year='%s' AND comments IS NOT NULL)"
+                         "WHERE (uid='%s' AND cycle='%s' AND year='%s' AND (comments IS NOT "" OR comments IS NOT NULL))"
                          % (userID['uid'],cycle,year))
                 result = self.runQuery(query,all=0)
                 
                 if numComm != result:
-                    err += "Not all compliance data has been entered. "
+                    err += "Not all performance comment data has been entered. "
+                
                 
                 if err:
+                    err += "Please fix this before submitting again..."
                     ref = ('/personalpdp/%s' % userName)
                     raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=%s&id=bottom#bottom' % (userName,err,ref))
             
