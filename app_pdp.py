@@ -864,9 +864,9 @@ class PeedyPee(object):
             #for j in range(len(uidStr)):
             #cherrypy.log.error(uidStr)
             if type(uidStr) is list:
-                plist = plist
+                uidStr = uidStr
             else:
-                plist = [plist]
+                uidStr = [uidStr]
                 
             for uid in uidStr:
                 query = ("SELECT userName FROM `person` WHERE uid='%s'" % uid)
