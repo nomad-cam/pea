@@ -130,7 +130,9 @@ To view a previously completed year please select a year and click 'Select'.
             </select> 
             <input type='text' name='course_other[]' {% if result.course == 2 %} value='{{ result.courseOther }}' {% endif %}></td>
         {% if selectDB.cycle == 3 %}
-        <td><textarea name='manager_comments[]' rows='4' cols='30'>{{ result.comments }}</textarea></td>
+        <td><textarea name='manager_comments[]' rows='4' cols='30'>
+        {% if result.comments %}{{ result.comments }}
+        {% else %}{% endif %}</textarea></td>
         {% endif %}
     </tr> 
     {% endfor %}

@@ -260,7 +260,11 @@ class PeedyPee(object):
                 other = None
                 if "course_other[]" in kws:
                     other = kws['course_other[]']
-        
+                
+                man_comms = None
+                if "manager_comments[]" in kws:
+                    man_comms = kws["manager_comments[]"]
+                
                 aligns = []
                 for t in range(len(kws['pid[]'])):
                     tmpStr = "person_aligns[%s]" % kws['pid[]'][t]
@@ -278,11 +282,12 @@ class PeedyPee(object):
                 for j in range(len(kws['pid[]'])):
                     query = ("UPDATE `person-pdp-data` "
                          "SET goal='%s', align='%s', reason='%s', deadline='%s', "
-                         "budget='%s', course='%s', courseOther='%s' "
+                         "budget='%s', course='%s', courseOther='%s', comments='%s' "
                          "WHERE pid='%s'" 
                          % (kws['person_goals[]'][j],aligns[j],
                          kws['person_reason[]'][j],kws['person_deadline[]'][j],
-                         kws['person_budget[]'][j],kws['person_training[]'][j],other[j],kws['pid[]'][j]))
+                         kws['person_budget[]'][j],kws['person_training[]'][j],other[j],
+                         man_comms[j],kws['pid[]'][j]))
                          
                     self.runQuery(query,read=0)
                 
@@ -347,7 +352,7 @@ class PeedyPee(object):
             
             query = ("SELECT * FROM `person-pdp-data` WHERE (uid='%s' AND year='%s' AND cycle='%s')" 
                     %(select_dict['uid'],year,select_dict['cycle']))
-            pdp = self.runQuery(query,all=1)        
+            pdp = self.runQuery(query,all=1)
             #error=query
             
             query = ("SELECT * FROM `values-data` WHERE (uid='%s' AND year='%s' AND cycle='%s')"
@@ -570,8 +575,8 @@ class PeedyPee(object):
             else:
                 #The manager should sign off first (or at same time)
                 err = "A manager has not signed off on this PDP"
-                ref = ('/personalpdp/%s#botom' % userName)
-                raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=%s#bottom' % (userName,err,ref))
+                ref = ('/personalpdp/%s' % userName)
+                raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=%s&id=bottom#bottom' % (userName,err,ref))
             
             thisday = date.today().strftime("%Y/%m/%d")
             next_cycle = cycle + 1
@@ -583,6 +588,49 @@ class PeedyPee(object):
             #Get the uid
             query = "SELECT uid FROM `person` WHERE userName='%s'" % userName
             userID = self.runQuery(query,all=0)
+            
+            
+            #Before donig too much check if all the other required tables are filled out for cycle 3...
+            #Redirect if not all saved...
+            if cycle == 3:
+                err = ""
+                #check if values-data has been written
+                #get the number of values...
+                query = ("SELECT COUNT(vid) FROM `values` WHERE disabled IS NULL ")
+                numVals = self.runQuery(query,all=0)
+                query = ("SELECT COUNT(uid) FROM `values-data` WHERE (uid='%s' AND cycle='%s' AND year='%s')" 
+                         % (userID['uid'],cycle,year))
+                result = self.runQuery(query,all=1) 
+                
+                if numVals != result:
+                    err += "Not all values data has been entered. "
+                    
+                #check if compliance-data has been written
+                query = ("SELECT COUNT(cid) FROM compliance WHERE disabled IS NULL")
+                numComp = self.runQuery(query,all=0)
+                query = ("SELECT COUNT(uid) FROM `compliance-data` WHERE (uid='%s' AND cycle='%s' AND year='%s')"
+                         % (userID['uid'],cycle,year))
+                
+                if numComp != result:
+                    err += "Not all compliance data has been entered. "
+                    
+                #check if comments have been written for the person-pdp-data                
+                query = ("SELECT COUNT(uid) FROM `person-pdp-data` "
+                         "WHERE (uid='%s' AND cycle='%s' AND year='%s')"
+                         % (userID['uid'],cycle,year))
+                numComm = self.runQuery(query,all=0)
+                query = ("SELECT COUNT(uid) FROM `person-pdp-data` "
+                         "WHERE (uid='%s' AND cycle='%s' AND year='%s' AND comments IS NOT NULL)"
+                         % (userID['uid'],cycle,year))
+                result = self.runQuery(query,all=0)
+                
+                if numComm != result:
+                    err += "Not all compliance data has been entered. "
+                
+                if err:
+                    ref = ('/personalpdp/%s' % userName)
+                    raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=%s&id=bottom#bottom' % (userName,err,ref))
+            
             
             #Check if there is already an entry in the DB (ie if man has signed but not emp)
             query = ("SELECT `manager-sign`,`person-sign` FROM `person-pdp-signoff` WHERE (uid='%s' AND cycle='%s' AND year='%s')"
@@ -623,8 +671,8 @@ class PeedyPee(object):
                     
                     
             err = "The PDP for this cycle has now been signed off"
-            ref = ('/personalpdp/%s#botom' % userName)
-            raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=%s' % (userName,err,ref))
+            ref = ('/personalpdp/%s' % userName)
+            raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=%s&id=bottom' % (userName,err,ref))
                 
         
             #raise cherrypy.HTTPRedirect('/personalpdp/%s?e=%s&ref=/personalpdp/%s#bottom' % (userName,err,userName))
