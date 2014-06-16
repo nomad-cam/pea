@@ -6,7 +6,7 @@ body {
   /*padding: 50px;*/
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   color: #333;
-  background: url(/images/diffraction-background-repeating.jpg) repeat-x #a2cfef;
+  background: url(/images/diffraction-background-repeating.jpg) repeat-x #A8DDF3 /*#a2cfef*/;
   height: 100%;
 }
 
