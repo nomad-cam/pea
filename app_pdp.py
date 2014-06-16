@@ -704,7 +704,7 @@ class PeedyPee(object):
                      "FROM `group-pdp-data` "
                      "WHERE (gid='%s' AND cycle='%s' AND year='%s')" % (next_cycle,groupID['gid'],cycle,year))
             self.runQuery(query,read=0)
-            err=query
+            
             #Save the sign off data...
             query = ("INSERT INTO `group-pdp-signoff` "
                      "(gid,year,cycle,date,manager_checked,comments) "
@@ -717,7 +717,7 @@ class PeedyPee(object):
             # if person.cycle = 0
             #    update to new cycle person.cycle
             
-#            err="Signoff Complete. Progressed to Cycle: %s..." % (next_cycle)
+            err="Signoff Complete. Progressed to Cycle: %s..." % (next_cycle)
             raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s&ref=/grouppdp/%s/%s'%(group_url,year,err,group_url,year))
             
 
