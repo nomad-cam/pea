@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+
+{% block greeting %}
+{{ user }}
+{% endblock %}
+
+{% block sidebar %}
+<a href='/'>Home</a>
+<br>
+<br>
+<a href='{{ ref }}'>Back</a>
+{% endblock %}
+
+{% block content %}
+
+<h2>Help!</h2>
+This is a place holder for relevent help information
+
+{% endblock %}
