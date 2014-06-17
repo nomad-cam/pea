@@ -122,7 +122,7 @@ To view a previously completed year please select a year and click 'Select'.
             {% if not result.align %}checked{% endif %}>No</label></td>
         <td><textarea name='person_reason[]' rows='4' cols='30'>{{ result.reason }}</textarea></td>
         <td><input type='text' name='person_deadline[]' size='10' value='{{ result.deadline }}'></td>
-        <td>$ <input type='number' name='person_budget[]' size='10' value='{{ result.budget }}'></td> 
+        <td>$ <input type='text' name='person_budget[]' size='10' value='{{ result.budget }}'></td> 
         <td><select name="person_training[]" id="person_training"> 
             {% for train in training -%}
             <option value='{{ train.tid }}' {% if train.tid == result.course %} selected {% endif %} >{{ train.courseName }}</option>
