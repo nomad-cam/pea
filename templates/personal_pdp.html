@@ -19,11 +19,11 @@
 <h2>Personal PDP Admin</h2>
 <form action='/personalpdp_initialise' method='POST'>
 <fieldset class='new-goals'>
-<legend><b>Initialise New Goals</b></legend>
-<label>Start Year: 
+<legend><b>Initialise Goals for New Cycle</b></legend>
+<label>Year: 
 <select name='init_goals' id='select_box' title='The year at the start of the pdp cycle'>
-        {% for year in aInitYear %}<option value='{{ year.year }}'>  {{ year.year }}  </option>{% endfor %}
-        </select> {# Bug in list when more than one year.. #}
+        {% for year in aInitYear %}<option value='{{ year.year }}'>  {{ year.year }} - {{ year.year + 1 }}  </option>{% endfor %}
+        </select> 
 </label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
 <input type='submit' value='Create' ><br><br>
@@ -32,9 +32,9 @@ To get the new cycle started please select a year and click 'Create'.
 </form>
 <form action='/personalpdp_changeyear' method='POST' class='change-year-form'>
 <fieldset class='new-goals'>
-<legend><b>Select Year Goals</b></legend>
+<legend><b>View Goals for Previous Year</b></legend>
 <label>Year: <select name='select_year' id='select_box' title='The year at the start of the pdp cycle'>
-        {% for year in aViewYear %}<option value='{{ year.year }}'>{{ year.year }}</option>{% endfor %}
+        {% for year in aViewYear %}<option value='{{ year.year }}'> {{ year.year }} - {{ year.year + 1 }} </option>{% endfor %}
         </select></label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
 <input type='submit' value='Select'><br><br>
