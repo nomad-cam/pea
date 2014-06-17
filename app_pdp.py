@@ -897,12 +897,18 @@ class PeedyPee(object):
         if self.loggedin():
             
             name = kws['group_name']
-            year = kws['year_goals']
             
-            if year == "":
-                urlStr = ("/grouppdp/%s?e=No Year Selected&ref=/grouppdp/%s" % (name,name))
+            if 'year_goals' in kws:
+                year = kws['year_goals']
+                urlStr = ("/grouppdp/%s/%s" % (name,year))                
             else:
-                urlStr = ("/grouppdp/%s/%s" % (name,year))
+                urlStr = ("/grouppdp/%s?e=No Year Selected&ref=/grouppdp/%s" % (name,name))
+            
+            
+            #if year == "":
+            #    urlStr = ("/grouppdp/%s?e=No Year Selected&ref=/grouppdp/%s" % (name,name))
+            #else:
+            #    urlStr = ("/grouppdp/%s/%s" % (name,year))
                 
             raise cherrypy.HTTPRedirect(urlStr)
 
