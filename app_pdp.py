@@ -464,14 +464,16 @@ class PeedyPee(object):
                 if "course_other[]" in kws:
                     other = kws['course_other[]']
             
-                # Reference the group_member list
-                names = []
+                #first make sure that at least one item is selected
+                    names = []
+                    # Reference the group_member list
                 for j in range(len(kws['zid[]'])):                    
                     tmpStr = "group_owners[%s]" % kws['zid[]'][j]
                     if tmpStr in kws:
                         names.append( kws[tmpStr] )
                     else:
-                        names.append(0)
+                        names.append("0")
+                 
                 
                 # First save data then add a new line                                
                 for j in range(len(kws['zid[]'])):
@@ -507,7 +509,7 @@ class PeedyPee(object):
                     if tmpStr in kws:   # test if any value has been selected
                         names.append(kws[tmpStr]) #append as string list
                     else:
-                        names.append(0) #if no value selected set to 0
+                        names.append("0") #if no value selected set to 0
                    
                             
                 # Save the current data
