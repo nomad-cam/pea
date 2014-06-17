@@ -19,7 +19,11 @@
 <form action='/grouppdp_initialise' method='POST'>
 <fieldset class='new-goals'>
 <legend><b>Initialise Group Goals for New Cycle</b></legend>
-<label>Year:  <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'></label>
+<label>Year:  {# <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'> #}
+<select name='init_goals' id='select_box' title='The year at the start of the pdp cycle'>
+{% for year in aInitYear %}<option value='{{ year.year }}'>  {{ year.year }} - {{ year.year + 1 }}  </option>{% endfor %}
+</select>
+</label>
 <input type='hidden' name='group_name' value='{{ group_url }}'>
 <input type='submit' value='Create'>
 </fieldset>
@@ -28,7 +32,11 @@
 <form action='/grouppdp_changeyear' method='POST'>
 <fieldset class='new-goals'>
 <legend><b>View Goals for Previous Year</b></legend>
-<label>Year:  <input type="text" name='year_goals' size='10' title='The year at the start of the pdp cycle'></label>
+<label>Year:  {# <input type="text" name='year_goals' size='10' title='The year at the start of the pdp cycle'> #}
+<select name='year_goals' id='select_box' title='The year at the start of the pdp cycle'>
+{% for year in aViewYear %}<option value='{{ year.year }}'> {{ year.year }} - {{ year.year + 1 }} </option>{% endfor %}
+</select>
+</label>
 <input type='hidden' name='group_name' value='{{ group_url }}'>
 <input type='submit' value='Select'>
 </fieldset><p>
@@ -93,13 +101,13 @@ Group goals, place a blurb here
 {% endfor -%}
     
 </table>
-{% if not (person_pdp) %}
+{% if not (groupPDPs) %}
 <br>
 ** Please initialise your goals for the current year... This can be done using the Initialise New Goals button above...
 {% endif %}
 <br>
 <br>
-{% if (person_pdp) %}
+{% if (groupPDPs) %}
 <input type='submit' name="add_group_row" value="Add Row">
 <input type='submit' name="save_group_data" value="Save Data">
 {% endif %}

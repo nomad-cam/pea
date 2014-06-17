@@ -540,6 +540,17 @@ class PeedyPee(object):
                 
             g_owners = [map(int, x) for x in g_temp]
             
+            #get the available years for the dropdown box
+            query = "SELECT DISTINCT year FROM `group-pdp-data` WHERE gid='%s'" % groupID['gid']
+            avail_view_year = self.runQuery(query,all=1)
+            
+            #query = "SELECT DISTINCT year FROM `group-pdp-data` WHERE gid='%s'" % groupID['gid']
+            #avail_init_year = self.runQuery(query,all=1)
+            #cherrypy.log.error(json.dumps(avail_init_year))
+            avail_init_year = [{"year": year}, {"year": year + 1}]
+            
+            
+            
             #used for side bar details
             g_manager_name = self.convertUser(side_dict['manager'])
             g_name = self.convertGroup(side_dict['groupName'])
@@ -550,6 +561,7 @@ class PeedyPee(object):
                             year=year,cycle=current_cycle['cycle'],group_url=group,
                             groupPDPs=gpdps,groupName=groupID['groupName'],
                             gOwners=g_owners,gName=g_name,gManagerName=g_manager_name,
+                            aInitYear=avail_init_year,aViewYear=avail_view_year,
                             manager=groupID['manager'],gMembers=g_members)
             
         else:
@@ -842,16 +854,18 @@ class PeedyPee(object):
                                 1,resDict[k]['description'],resDict[k]['deadline'],resDict[k]['course'],
                                 resDict[k]['courseOther']))
                         self.runQuery(query,read=0)
-                        err = query
+                        #err = query
                 
                 
                 
                 # start out in cycle 1 of current year
                 query = ("INSERT INTO `person-pdp-data` (uid,year,cycle) "
                          "VALUES ('%s','%s',1)" % (u_ref['uid'],yearSelect))
-                for i in range(4-len(resDict)):
-                    #Insert 4 blank lines
-                    self.runQuery(query,read=0)
+                if len(resDict) <= 4:
+                # if more than 4 in resDict, don't need to populate blanks, only need min 4...
+                    for i in range(4-len(resDict)):
+                        #Insert 4 blank lines
+                        self.runQuery(query,read=0)
                 
                 err = ''
                 urlStr = ("/personalpdp/%s/%s?e=Person PDP Initialised %s... %s&ref=/personalpdp/%s/%s" %
