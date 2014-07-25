@@ -544,10 +544,10 @@ class PeedyPee(object):
             query = "SELECT DISTINCT year FROM `group-pdp-data` WHERE gid='%s'" % groupID['gid']
             avail_view_year = self.runQuery(query,all=1)
             
-            #query = "SELECT DISTINCT year FROM `group-pdp-data` WHERE gid='%s'" % groupID['gid']
-            #avail_init_year = self.runQuery(query,all=1)
+            query = "SELECT DISTINCT year FROM `group-pdp-data` WHERE gid='%s'" % groupID['gid']
+            avail_init_year = self.runQuery(query,all=1)
             #cherrypy.log.error(json.dumps(avail_init_year))
-            avail_init_year = [{"year": year}, {"year": year + 1}]
+            #avail_init_year = [{"year": year}, {"year": year + 1}]
             
             
             
