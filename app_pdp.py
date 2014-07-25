@@ -282,14 +282,25 @@ class PeedyPee(object):
                 
                 #Save data
                 for j in range(len(kws['pid[]'])):
-                    query = ("UPDATE `person-pdp-data` "
-                         "SET goal='%s', align='%s', reason='%s', deadline='%s', "
-                         "budget='%s', course='%s', courseOther='%s', comments='%s' "
-                         "WHERE pid='%s'" 
-                         % (kws['person_goals[]'][j],aligns[j],
-                         kws['person_reason[]'][j],kws['person_deadline[]'][j],
-                         kws['person_budget[]'][j],kws['person_training[]'][j],other[j],
-                         man_comms[j],kws['pid[]'][j]))
+                    if man_comms:
+                        query = ("UPDATE `person-pdp-data` "
+                             "SET goal='%s', align='%s', reason='%s', deadline='%s', "
+                             "budget='%s', course='%s', courseOther='%s', comments='%s' "
+                             "WHERE pid='%s'" 
+                             % (kws['person_goals[]'][j],aligns[j],
+                             kws['person_reason[]'][j],kws['person_deadline[]'][j],
+                             kws['person_budget[]'][j],kws['person_training[]'][j],other[j],
+                             man_comms[j],kws['pid[]'][j]))
+                    
+                    else:
+                        query = ("UPDATE `person-pdp-data` "
+                             "SET goal='%s', align='%s', reason='%s', deadline='%s', "
+                             "budget='%s', course='%s', courseOther='%s', comments='' "
+                             "WHERE pid='%s'" 
+                             % (kws['person_goals[]'][j],aligns[j],
+                             kws['person_reason[]'][j],kws['person_deadline[]'][j],
+                             kws['person_budget[]'][j],kws['person_training[]'][j],other[j],
+                             kws['pid[]'][j]))
                          
                     self.runQuery(query,read=0)
                 
