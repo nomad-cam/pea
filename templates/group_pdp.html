@@ -21,7 +21,11 @@
 <legend><b>Initialise Group Goals for New Cycle</b></legend>
 <label>Year:  {# <input type="text" name='init_goals' size='10' title='The year at the start of the pdp cycle'> #}
 <select name='init_goals' id='select_box' title='The year at the start of the pdp cycle'>
+{% if aInitYear %}
 {% for year in aInitYear %}<option value='{{ year.year }}'>  {{ year.year }} - {{ year.year + 1 }}  </option>{% endfor %}
+{% else %}
+<option value='{{ year }}'>{{ year }} - {{ year|int() + 1 }}</option>
+{% endif %}
 </select>
 </label>
 <input type='hidden' name='group_name' value='{{ group_url }}'>
@@ -47,8 +51,8 @@
 <h1>Group PDP for {{ groupName }}</h1>
 <b>Current Cycle: {{ cycle }}</b>
 {% if cycle == 0 %}(Waiting for group goals to be set){% endif %}
-{% if cycle == 1 %}(Setting personal goals){% endif %}
-{% if cycle == 2 %}(Review and confirm personal goals){% endif %}
+{% if cycle == 1 %}(Setting group goals){% endif %}
+{% if cycle == 2 %}(Review and confirm group goals){% endif %}
 {% if cycle == 3 %}(End of cycle assessment){% endif %}
 <br><br>
 <b>Current Year: {{ year }} - {{ year|int() + 1 }}</b>
