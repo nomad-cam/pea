@@ -236,7 +236,7 @@ class PeedyPee(object):
                     else:
                         aligns.append( 0 )
                                                  
-                # First save data then add a new line                                
+                # First save data then add a new line
                 for j in range(len(kws['pid[]'])):
                     query = ("UPDATE `person-pdp-data` "
                          "SET goal='%s', align='%s', reason='%s', deadline='%s', "
@@ -253,7 +253,7 @@ class PeedyPee(object):
                          "VALUES (%s,%s,%s)" % (select_dict['uid'], year, current_cycle['cycle']))
                 self.runQuery(query,read=0)
                 
-                err = "New line added to table... " #+ json.dumps(aligns)
+                err = "New line added to table... "
                 refStr = cherrypy.request.path_info
                 
                 raise cherrypy.HTTPRedirect('/personalpdp/%s/%s/?e=%s&ref=%s&id=person_goals'% (selectName,year,err,refStr))
