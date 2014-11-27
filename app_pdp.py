@@ -504,7 +504,7 @@ class PeedyPee(object):
                          "VALUES (%s,%s,%s)" % (groupID['gid'], year, current_cycle['cycle']))
                 self.runQuery(query,read=0)
                 
-                #error = ""
+                err = "New row added to group PDP"
                 
                 raise cherrypy.HTTPRedirect('/grouppdp/%s/%s?e=%s&ref=%s'% (group,year,err,cherrypy.request.path_info))
             
