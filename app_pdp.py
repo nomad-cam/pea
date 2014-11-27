@@ -803,9 +803,11 @@ class PeedyPee(object):
         if self.loggedin():
                         
             groupName = kws['group_name'] #should be reference to groupUrl name
-            yearSelect = kws['init_goals']
+            if 'init_goals' in kws:
+                yearSelect = kws['init_goals']
+            else:
             
-            if yearSelect == "":
+            #if yearSelect == "":
                 urlStr = "/grouppdp/%s?e=No Year Selected&ref=/grouppdp/%s" % (groupName,groupName)
                 raise cherrypy.HTTPRedirect(urlStr)
             
@@ -834,9 +836,11 @@ class PeedyPee(object):
     def personalpdp_initialise(self, **kws):
         if self.loggedin():
             userName = kws['user_name']
-            yearSelect = kws['init_goals']
             
-            if yearSelect == "":
+            if 'init_goals' in kws:
+                yearSelect = kws['init_goals']
+            else:
+            #if yearSelect == "":
                 urlStr = "/personalpdp/%s?e=No Year Selected&ref=/personalpdp/%s" % (userName,userName)
                 raise cherrypy.HTTPRedirect(urlStr)
             
