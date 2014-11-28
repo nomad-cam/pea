@@ -610,7 +610,7 @@ class PeedyPee(object):
             
             if next_cycle > 3:
                 next_cycle = 1
-                year = year + 1
+                next_year = year + 1
             
             #Get the uid
             query = "SELECT uid FROM `person` WHERE userName='%s'" % userName
@@ -623,35 +623,37 @@ class PeedyPee(object):
                 err = ""
                 #check if values-data has been written
                 #get the number of values...
-                query = ("SELECT COUNT(vid) FROM `values` WHERE disabled IS NULL ")
+                query = ("SELECT COUNT(vid) as vals FROM `values` WHERE disabled IS NULL ")
                 numVals = self.runQuery(query,all=0)
-                query = ("SELECT COUNT(uid) FROM `values-data` WHERE (uid='%s' AND cycle='%s' AND year='%s')" 
+                query = ("SELECT COUNT(uid) as subs FROM `values-data` WHERE (uid='%s' AND cycle='%s' AND year='%s')" 
                          % (userID['uid'],cycle,year))
-                result = self.runQuery(query,all=1) 
+                result = self.runQuery(query,all=0) 
                 
-                if numVals != result:
-                    err += "Not all values data has been entered. "
+                if numVals["vals"] != result["subs"]:
+                    err += "Not all values data has been entered. 1:%s, 2:%s " % (numVals["vals"],result["subs"])
                     
                 #check if compliance-data has been written
-                query = ("SELECT COUNT(cid) FROM compliance WHERE disabled IS NULL")
+                query = ("SELECT COUNT(cid) as vals FROM compliance WHERE disabled IS NULL")
                 numComp = self.runQuery(query,all=0)
-                query = ("SELECT COUNT(uid) FROM `compliance-data` WHERE (uid='%s' AND cycle='%s' AND year='%s')"
-                         % (userID['uid'],cycle,year))
-                
-                if numComp != result:
-                    err += "Not all compliance data has been entered. "
-                    
-                #check if comments have been written for the person-pdp-data                
-                query = ("SELECT COUNT(uid) FROM `person-pdp-data` "
-                         "WHERE (uid='%s' AND cycle='%s' AND year='%s')"
-                         % (userID['uid'],cycle,year))
-                numComm = self.runQuery(query,all=0)
-                query = ("SELECT COUNT(uid) FROM `person-pdp-data` "
-                         "WHERE (uid='%s' AND cycle='%s' AND year='%s' AND (comments IS NOT "" OR comments IS NOT NULL))"
+                query = ("SELECT COUNT(uid) as subs FROM `compliance-data` WHERE (uid='%s' AND cycle='%s' AND year='%s')"
                          % (userID['uid'],cycle,year))
                 result = self.runQuery(query,all=0)
                 
-                if numComm != result:
+                if numComp["vals"] != result["subs"]:
+                    err += ("Not all compliance data has been entered. 1:%s  2:%s  3:%s  4:%s  5:%s" 
+                            % (numComp["vals"],result["subs"],userID['uid'],cycle,year))
+                    
+                #check if comments have been written for the person-pdp-data                
+                query = ("SELECT COUNT(uid) as vals FROM `person-pdp-data` "
+                         "WHERE (uid='%s' AND cycle='%s' AND year='%s')"
+                         % (userID['uid'],cycle,year))
+                numComm = self.runQuery(query,all=0)
+                query = ("""SELECT COUNT(uid) as subs FROM `person-pdp-data` 
+                            WHERE (uid='%s' AND cycle='%s' AND year='%s' AND comments IS NOT NULL)"""
+                         % (userID['uid'],cycle,year))
+                result = self.runQuery(query,all=0)
+                
+                if numComm["vals"] != result["subs"]:
                     err += "Not all performance comment data has been entered. "
                 
                 
@@ -694,7 +696,7 @@ class PeedyPee(object):
                 
                 if emp_sign and man_sign:
                     #update the employee cycle +1
-                    self.updateUserCycle(userID['uid'],next_cycle,year)
+                    self.updateUserCycle(userID['uid'],next_cycle,next_year)
                     
                     
                     
