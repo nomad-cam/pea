@@ -38,7 +38,11 @@
 <legend><b>View Goals for Previous Year</b></legend>
 <label>Year:  {# <input type="text" name='year_goals' size='10' title='The year at the start of the pdp cycle'> #}
 <select name='year_goals' id='select_box' title='The year at the start of the pdp cycle'>
+{% if aViewYear %}
 {% for year in aViewYear %}<option value='{{ year.year }}'> {{ year.year }} - {{ year.year + 1 }} </option>{% endfor %}
+{% else %}
+<option value = ''>No Previous Goals</option>
+{% endif %}
 </select>
 </label>
 <input type='hidden' name='group_name' value='{{ group_url }}'>

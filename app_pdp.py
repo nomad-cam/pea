@@ -839,6 +839,9 @@ class PeedyPee(object):
             
             if 'init_goals' in kws:
                 yearSelect = kws['init_goals']
+                if yearSelect == "":  #if no years available to initialise, form returns "" from option select
+                    urlStr = "/personalpdp/%s?e=Invalid Year Selected&ref=/personalpdp/%s" % (userName,userName)
+                    raise cherrypy.HTTPRedirect(urlStr)
             else:
             #if yearSelect == "":
                 urlStr = "/personalpdp/%s?e=No Year Selected&ref=/personalpdp/%s" % (userName,userName)

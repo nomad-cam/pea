@@ -22,7 +22,11 @@
 <legend><b>Initialise Goals for New Cycle</b></legend>
 <label>Year: 
 <select name='init_goals' id='select_box' title='The year at the start of the pdp cycle'>
+{% if aInitYear %}
 {% for year in aInitYear %}<option value='{{ year.year }}'>  {{ year.year }} - {{ year.year + 1 }}  </option>{% endfor %}
+{% else %}
+<option value=''>Not yet available</option>
+{% endif %}
 </select> 
 </label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
@@ -34,7 +38,11 @@ To get the new cycle started please select a year and click 'Create'.
 <fieldset class='new-goals'>
 <legend><b>View Goals for Previous Year</b></legend>
 <label>Year: <select name='select_year' id='select_box' title='The year at the start of the pdp cycle'>
+{% if aViewYear %}
 {% for year in aViewYear %}<option value='{{ year.year }}'> {{ year.year }} - {{ year.year + 1 }} </option>{% endfor %}
+{% else %}
+<option value=''>No Previous Goals</option>
+{% endif %}
 </select></label>
 <input type='hidden' name='user_name' value='{{ selectDB.userName }}'>
 <input type='submit' value='Select'><br><br>
