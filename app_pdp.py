@@ -715,7 +715,7 @@ class PeedyPee(object):
         
         last_cycle = cycle - 1
         
-        
+        #copy the current goals(last_cycle) into the next cycle
         query = ("INSERT INTO `person-pdp-data` (uid,cycle,year,goal,align,reason,"
                 "deadline,budget,course,courseOther,comments) " 
                 "SELECT uid,%s,%s,goal,align,reason,deadline,budget,course,courseOther,comments "
