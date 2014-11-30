@@ -28,10 +28,6 @@ config_data = open('config.json')
 values = json.load(config_data)
 config_data.close()
 
-#db = MySQLdb.connect(host=values['DB']['host'],user=values['DB']['dbuser'],
-#                    passwd=values['DB']['password'],db=values['DB']['database'],
-#                    cursorclass=MySQLdb.cursors.DictCursor)
-
 
 class PeedyPee(object):
     
@@ -188,14 +184,18 @@ class PeedyPee(object):
                     error.append( kws['id'] )
                 else:
                     error.append('')
-            #else:
-            #    error = ['','','']
-            
+                        
             # enable managers and admin to view other pdps
             if user:
                 #must be admin or manager to view others pdp
-                if (self.isAdmin(uid) or self.isManager(uid)):
+                if self.isAdmin(uid):
                     selectName = user #remote user
+                elif self.isManager(uid):
+                    #only allow managers to view people who are in their group...
+                    if self.whosManager(uid,user):
+                        selectName = user
+                    else:
+                        selectName = userName
                 else:
                     selectName = userName
             else:
@@ -1254,6 +1254,18 @@ class PeedyPee(object):
         result = self.runQuery(query,all=0)
         
         if result['isManager']:
+            return True
+        else:
+            return False
+
+    #Check if user in in managers group
+    def whosManager(self, managerID, userName):
+        query = "SELECT manager FROM `person` WHERE userName='%s'" % userName
+        result = self.runQuery(query,all=0)
+        cherrypy.log.error(json.dumps(result['manager']))
+        cherrypy.log.error("manager: %s, user: %s" % (managerID,userName))
+
+        if result['manager'] == managerID:
             return True
         else:
             return False
