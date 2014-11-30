@@ -761,6 +761,7 @@ class PeedyPee(object):
             #//TODO: determine actions when complete cycle 3...
             if next_cycle > 3:
                 next_cycle = 1
+                next_year = year + 1
                 #//TODO: update year also
             
             thisday = date.today().strftime("%Y/%m/%d")
@@ -768,8 +769,7 @@ class PeedyPee(object):
             groupID = self.runQuery(query,all=0)
             
             # //TODO: verify operation of the hand-over procedure
-            
-            # //TODO: implement the visible variable in DB
+                        
             #set current cycle to visible
             query = ("UPDATE `group-pdp-data` SET visible=1 WHERE (gid='%s' AND cycle='%s' AND year='%s')"
                     % (groupID['gid'],cycle,year) )
@@ -855,7 +855,7 @@ class PeedyPee(object):
                 urlStr = "/personalpdp/%s?e=No Year Selected&ref=/personalpdp/%s" % (userName,userName)
                 raise cherrypy.HTTPRedirect(urlStr)
             
-            query = "SELECT uid FROM `person` where userName='%s'" % userName
+            query = "SELECT uid,groupName FROM `person` where userName='%s'" % userName
             u_ref = self.runQuery(query,all=0)
             
             query = "SELECT uid FROM `person-pdp-data` WHERE (year='%s' AND uid='%s')" % (yearSelect,u_ref['uid'])
@@ -866,19 +866,19 @@ class PeedyPee(object):
                 urlStr = ("/personalpdp/%s/%s?e=Goals already initialised for year %s&ref=/personalpdp/%s/%s" %
                             (userName,yearSelect,yearSelect,userName,yearSelect))
             else:
-                # //TODO: pre load the relevent group goals
-                query = ("SELECT * FROM `group-pdp-data` WHERE owners LIKE '%%\"%s\"%%' " % u_ref['uid'])
+                # pre load the relevent group goals including ALL (0)
+                query = ("SELECT * FROM `group-pdp-data` WHERE visible='1' AND gid = '%s' AND (owners LIKE '%%\"0\"%%' OR owners LIKE '%%\"%s\"%%' )" % (u_ref['groupName'], u_ref['uid']))
                 resDict = self.runQuery(query,all=1)
                 
                 #err = json.dumps(len(resDict))
                 if resDict:
                     for k in range(len(resDict)):
                         query = ("INSERT INTO `person-pdp-data` (uid,cycle,year,goal,align,reason,deadline,"
-                             "course,courseOther) "
-                             "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s')"
+                             "budget,course,courseOther) "
+                             "VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')"
                              % (u_ref['uid'],resDict[k]['cycle'],resDict[k]['year'],resDict[k]['goalTitle'],
-                                1,resDict[k]['description'],resDict[k]['deadline'],resDict[k]['course'],
-                                resDict[k]['courseOther']))
+                                1,resDict[k]['description'],resDict[k]['deadline'],resDict[k]['budget'],
+                                resDict[k]['course'],resDict[k]['courseOther']))
                         self.runQuery(query,read=0)
                         #err = query
                 
