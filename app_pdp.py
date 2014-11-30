@@ -545,11 +545,17 @@ class PeedyPee(object):
             g_temp = []
             for k in range(len(gpdps)):
                 if gpdps[k]['owners']:
-                    g_temp.append(json.loads(gpdps[k]['owners']))
+                    if len(gpdps[k]['owners']) > 6: # test if more than one user in the string eg. "32" or ["32","34"]
+                        g_temp.append(json.loads(gpdps[k]['owners']))
+                    else:
+                        tmp = [json.loads(gpdps[k]['owners'])]
+                        #cherrypy.log.error("%s, %s" % (tmp,type(gpdps[k]['owners'])))
+                        g_temp.append(tmp)
                 else:
                     g_temp.append('0') #default to all as ALL is always present in the template
-                
+            #cherrypy.log.error(json.dumps(g_temp))
             g_owners = [map(int, x) for x in g_temp]
+            #cherrypy.log.error(json.dumps(g_owners))
             
             #get the available years for the dropdown box
             query = "SELECT DISTINCT year FROM `group-pdp-data` WHERE gid='%s'" % groupID['gid']
