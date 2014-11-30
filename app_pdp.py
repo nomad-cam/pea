@@ -384,6 +384,12 @@ class PeedyPee(object):
             query = "SELECT DISTINCT year FROM `group-pdp-data` WHERE gid='%s'" % select_dict['groupName']
             avail_init_year = self.runQuery(query,all=1)
             
+            query = ("SELECT `manager-sign`,`person-sign` FROM `person-pdp-signoff` WHERE (uid='%s' AND year='%s' AND cycle='%s')"
+                    % (select_dict['uid'],year,select_dict['cycle']))
+            sign_state = self.runQuery(query,all=1)
+            cherrypy.log.error(json.dumps(sign_state))
+            cherrypy.log.error(query)
+
             query = ("SELECT course,courseOther FROM `group-pdp-data` WHERE (gid='%s' AND year='%s' AND cycle='%s')"
                     % (select_dict['groupName'],year,select_dict['cycle']))
             result = self.runQuery(query,all=1)
@@ -415,7 +421,7 @@ class PeedyPee(object):
                             compliance=p_compliance,val_opts=p_opt_val,comp_opts=p_opt_comp,
                             valuesDB=values_data,complianceDB=compliance_data,ownersList=owner_list,
                             aViewYear=avail_view_year,aInitYear=avail_init_year,gTrainName=g_train_name,
-                            gName=g_name,gManagerName=g_manager_name,
+                            gName=g_name,gManagerName=g_manager_name,signed=sign_state,
                             user=userName,title=cookies['title'],name=cookies['fname'])
             
         else:

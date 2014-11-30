@@ -232,12 +232,14 @@ To view a previously completed year please select a year and click 'Select'.
 <br>
 <a name='bottom'></a>
 <h2> Sign-off</h2>
+
 <form action='/personalpdp_signoff/{{ selectDB.userName }}' method='POST'>
 <input type='hidden' name='p_cycle' value='{{ selectDB.cycle }}'>
 <input type='hidden' name='p_year' value='{{ selectDB.year }}'>
-<label>Manager Sign-off<input type='checkbox' name='manager-sign'></label>
+
+<label>Manager Sign-off {# % if signed % #}{#{ signed.manager-sign }#} {# % endif % #}<input type='checkbox' name='manager-sign'></label>
 <br />
-<label>Employee Sign-off<input type='checkbox' name='employee-sign'></label>
+<label>Employee Sign-off {# % if signed % #}{#{ signed.person-sign }#} {# % endif % #}<input type='checkbox' name='employee-sign'></label>
 <br />
 <label>Emplyee Comments<textarea name='employee-comment' rows='4' cols='20'></textarea></label>
 <br>
